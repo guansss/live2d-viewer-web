@@ -53,12 +53,26 @@ export function forEachNode(node: TreeNode, fn: (node: TreeNode) => void) {
     }
 }
 
-export function getFilePath(folder: TreeNode, file: string): string | undefined {
+export function getFileURL(folder: TreeNode, file: string): string | undefined {
     const folderPath = getNodePath(folder);
 
     if (folderPath) {
-        return 'https://cdn.jsdelivr.net/gh/' + folderPath + '/' + file;
+        const filePath = encodeURI(folderPath + '/' + file);
+
+        return `https://cdn.jsdelivr.net/gh/${filePath}`;
     }
+}
+
+export function getAlternativeURL(url: string): string {
+    // raw: "https://cdn.jsdelivr.net/gh/<repo>/<file>"
+    // alt: "https://raw.githubusercontent.com/<repo>/master/<file>"
+
+    const repoAndFile = url.replace('https://cdn.jsdelivr.net/gh/', '');
+    const names = repoAndFile.split('/');
+    const repo = names.slice(0, 2).join('/');
+    const file = names.slice(2).join('/');
+
+    return `https://raw.githubusercontent.com/${repo}/master/${file}`;
 }
 
 export function getNodePath(node: TreeNode): string | undefined {

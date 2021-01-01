@@ -1,7 +1,9 @@
 import { Live2DModel } from '@/live2d/Live2DModel';
 import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools';
+import { getAlternativeURL } from '@/data/model-list';
 
+// 1x1 green image
 const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
 
 let uid = 0;
@@ -30,14 +32,35 @@ export class ModelEntity extends EventEmitter {
 
         this.url = url;
 
-        Live2DModel.from(url)
-            .then(model => {
-                this.initModel(model);
-                this.emit('modelLoaded', model);
-            })
-            .catch(e => {
-                this.error = e instanceof Error ? e.message : e + '';
-            });
+        this.loadModel().then();
+    }
+
+    async loadModel() {
+        const handleError = (e: any) => {
+            this.error = e instanceof Error ? e.message : e + '';
+
+            return undefined;
+        };
+
+        try {
+            this.pixiModel = await Live2DModel.from(this.url);
+        } catch (e) {
+            // JSDelivr may respond with 403
+            if (e.status === 403) {
+                this.url = getAlternativeURL(this.url);
+            } else {
+                handleError(e);
+            }
+        }
+
+        if (!this.pixiModel) {
+            this.pixiModel = await Live2DModel.from(this.url).catch(handleError);
+        }
+
+        if (this.pixiModel) {
+            this.initModel(this.pixiModel);
+            this.emit('modelLoaded', this.pixiModel);
+        }
     }
 
     initModel(pixiModel: Live2DModel) {

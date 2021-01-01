@@ -52,7 +52,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import xor from 'lodash/xor';
-import { getFilePath, getRootNodes, loadRootNode, TreeNode } from '@/data/model-list';
+import { getFileURL, getRootNodes, loadRootNode, TreeNode } from '@/data/model-list';
 
 export default Vue.extend({
     name: "ModelPicker",
@@ -105,7 +105,7 @@ export default Vue.extend({
         },
         submit() {
             if (this.activeFolders.length && this.selectedFileIndex >= 0) {
-                const file = getFilePath(this.activeFolders[0], this.activeFolderFiles[this.selectedFileIndex]);
+                const file = getFileURL(this.activeFolders[0], this.activeFolderFiles[this.selectedFileIndex]);
 
                 if (file) {
                     this.$emit('select', file);
