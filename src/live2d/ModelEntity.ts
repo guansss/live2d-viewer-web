@@ -2,6 +2,8 @@ import { Live2DModel } from '@/live2d/Live2DModel';
 import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools';
 
+const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
+
 let uid = 0;
 
 export class ModelEntity extends EventEmitter {
@@ -9,6 +11,7 @@ export class ModelEntity extends EventEmitter {
     url = '';
 
     thumbnail = '';
+    aspectRatio = 1;
 
     name = 'New Model';
     visible = true;
@@ -40,10 +43,10 @@ export class ModelEntity extends EventEmitter {
     initModel(pixiModel: Live2DModel) {
         this.pixiModel = pixiModel;
         this.name = pixiModel.internalModel.settings.name;
+        this.thumbnail = THUMBNAIL;
+        this.aspectRatio = pixiModel.width / pixiModel.height;
 
         draggable(pixiModel);
-
-        this.thumbnail = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
     }
 
     fit(width: number, height: number) {

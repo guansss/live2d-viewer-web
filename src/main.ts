@@ -9,11 +9,11 @@ Vue.prototype.$live2dApp = live2dApp;
 
 Vue.config.productionTip = false;
 
-Vue.directive('visible', function (el, binding) {
+Vue.directive('visible', function(el, binding) {
     el.style.visibility = !!binding.value ? 'visible' : 'hidden';
 });
 
-new Vue({
+(window as any).app = new Vue({
     vuetify,
     render: h => h(App),
 }).$mount('#app');

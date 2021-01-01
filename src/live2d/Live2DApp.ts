@@ -1,14 +1,18 @@
 import { ModelEntity } from '@/live2d/ModelEntity';
 import { Application } from '@pixi/app';
 import { Live2DModel } from '@/live2d/Live2DModel';
-import { Renderer } from '@pixi/core';
+import { BatchRenderer, Renderer } from '@pixi/core';
 import { Ticker, TickerPlugin } from '@pixi/ticker';
 import { InteractionManager } from '@pixi/interaction';
 import { config } from 'pixi-live2d-display';
+import { Extract } from '@pixi/extract';
+import { settings } from '@pixi/settings';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
 
+Renderer.registerPlugin('extract', Extract as any);
+Renderer.registerPlugin('batch', BatchRenderer);
 Renderer.registerPlugin('interaction', InteractionManager);
 
 config.logLevel = config.LOG_LEVEL_VERBOSE;
@@ -46,8 +50,20 @@ export class Live2DApp {
 
                 pixiModel.position.set(this.pixiApp.renderer.width / 2, this.pixiApp.renderer.height / 2);
                 model.fit(this.pixiApp.renderer.width, this.pixiApp.renderer.height);
+
+                model.thumbnail = this.createThumbnail(pixiModel);
             }
         });
+    }
+
+    createThumbnail(pixiModel: Live2DModel) {
+        settings.RESOLUTION = 0.2;
+
+        const dataURL = this.pixiApp.renderer.extract.base64(pixiModel, 'image/webp', 0.01);
+
+        settings.RESOLUTION = 1;
+
+        return dataURL;
     }
 
     destroyModel(id: number) {

@@ -28,6 +28,14 @@ declare module '@pixi/text' {
     export { Text, TextStyle } from 'pixi.js';
 }
 
+declare module '@pixi/extract' {
+    export { Extract } from 'pixi.js';
+}
+
+declare module '@pixi/settings' {
+    export { settings } from 'pixi.js';
+}
+
 declare module '@pixi/interaction' {
     import { interaction } from 'pixi.js';
     export import InteractionEvent = interaction.InteractionEvent;

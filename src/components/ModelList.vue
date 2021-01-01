@@ -7,7 +7,8 @@
             <v-card :color="model.error?'#631f1f':'blue-grey darken-4'" class="ma-2" @click="toggle">
               <v-tooltip top :disabled="!model.error">
                 <template v-slot:activator="{ on, attrs }">
-                  <v-img :src="model.thumbnail" min-width="150" max-width="300" height="192" v-bind="attrs" v-on="on">
+                  <v-img contain :src="model.thumbnail" :width="model.error?undefined:model.aspectRatio*192"
+                         height="192" v-bind="attrs" v-on="on">
                     <template v-slot:placeholder>
                       <v-row class="fill-height ma-0" align="center" justify="center">
                         <v-progress-circular v-if="!model.error" indeterminate

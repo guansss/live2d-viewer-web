@@ -76,10 +76,7 @@ export default Vue.extend({
     created() {
         this.models = this.$live2dApp.models;
         this.creation.dialog = true;
-    },
-    async mounted() {
-
-    },
+    }
 });
 </script>
 
