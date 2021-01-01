@@ -11,7 +11,7 @@
     "@types/lodash": "^4.14.166",
     "@vue/cli": "^4.5.9",
     "lodash": "^4.17.20",
-    "pixi-live2d-display": "^0.3.0-beta",
+    "pixi-live2d-display": "^0.3.0-beta.1",
     "pixi.js": "^5.3.6",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.3",

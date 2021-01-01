@@ -9258,10 +9258,10 @@ pirates@^4.0.0:
   dependencies:
     node-modules-regexp "^1.0.0"
 
-pixi-live2d-display@^0.3.0-beta:
-  version "0.3.0-beta"
-  resolved "https://registry.yarnpkg.com/pixi-live2d-display/-/pixi-live2d-display-0.3.0-beta.tgz#121548ce6d70e23d4ffe7fcee461c4e35dc26412"
-  integrity sha512-iAE1IO125NZIevYpLNXa8JzuS+u0+L7Cib/CzIACJHpAGzWCbYWREDTNnsK1DOB6CYxpaMKAOs/Ll2GJDwMRFQ==
+pixi-live2d-display@^0.3.0-beta.1:
+  version "0.3.0-beta.1"
+  resolved "https://registry.yarnpkg.com/pixi-live2d-display/-/pixi-live2d-display-0.3.0-beta.1.tgz#f57325a1467be9814f5a12c6bce99fa98bd28ea4"
+  integrity sha512-baxzo/cwK/Mfx62DPKNtAwuzgxwXpq8zTPgkXtEt3SE6K/1sCJbM9jMXawdlnLmf7TPR6CztA7peUbTqzTCMng==
   dependencies:
     lodash latest
 
