@@ -13,8 +13,10 @@ export class ModelEntity extends EventEmitter {
     name = 'New Model';
     visible = true;
 
-    scaleX = 1;
-    scaleY = 1;
+    private _scaleX = 1;
+    private _scaleY = 1;
+    private _rotation = 0;
+    private _zIndex = 0;
 
     error = '';
 
@@ -48,18 +50,32 @@ export class ModelEntity extends EventEmitter {
         if (this.pixiModel) {
             const scale = Math.min(width / this.pixiModel.width, height / this.pixiModel.height);
 
-            this.pixiModel.scale.set(scale);
+            this.scale(scale, scale);
         }
     }
 
     scale(scaleX?: number, scaleY?: number) {
-        scaleX = scaleX ?? this.scaleX;
-        scaleY = scaleY ?? this.scaleY;
-        this.scaleX = scaleX;
-        this.scaleY = scaleY;
+        this._scaleX = scaleX ?? this._scaleX;
+        this._scaleY = scaleY ?? this._scaleY;
 
         if (this.pixiModel) {
-            this.pixiModel.scale.set(scaleX, scaleY);
+            this.pixiModel.scale.set(this._scaleX, this._scaleY);
+        }
+    }
+
+    rotate(rotation: number) {
+        this._rotation = rotation;
+
+        if (this.pixiModel) {
+            this.pixiModel.rotation = rotation;
+        }
+    }
+
+    setZIndex(zIndex: number) {
+        this._zIndex = zIndex;
+
+        if (this.pixiModel) {
+            this.pixiModel.zIndex = zIndex;
         }
     }
 
@@ -75,5 +91,37 @@ export class ModelEntity extends EventEmitter {
         if (this.pixiModel) {
             this.pixiModel.destroy({ children: true });
         }
+    }
+
+    get zIndex(): number {
+        return this._zIndex;
+    }
+
+    set zIndex(value: number) {
+        this.setZIndex(value);
+    }
+
+    get rotation(): number {
+        return this._rotation;
+    }
+
+    set rotation(value: number) {
+        this.rotate(value);
+    }
+
+    get scaleY(): number {
+        return this._scaleY;
+    }
+
+    set scaleY(value: number) {
+        this.scale(undefined, value);
+    }
+
+    get scaleX(): number {
+        return this._scaleX;
+    }
+
+    set scaleX(value: number) {
+        this.scale(value, value);
     }
 }

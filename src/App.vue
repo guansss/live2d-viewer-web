@@ -14,18 +14,12 @@
 
       <v-divider></v-divider>
 
-      <v-list dense nav>
-        <v-list-item v-for="model in models" :key="model.id" link>
-          <v-list-item-content>
-            <v-list-item-title>{{ model.name }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+      <ModelEditor :id="selectedModelID"/>
     </v-navigation-drawer>
     <v-main>
       <v-container fluid class="pa-0 fill-height flex-column">
         <v-spacer></v-spacer>
-        <ModelList :show="modelList.visible"/>
+        <ModelList v-model="selectedModelID" :show="modelList.visible"/>
       </v-container>
       <ModelCreation v-model="creation.dialog"/>
     </v-main>
@@ -42,25 +36,23 @@ import Vue from 'vue';
 import ModelList from './components/ModelList.vue';
 import ModelCreation from './components/ModelCreation.vue';
 import { ModelEntity } from '@/live2d/ModelEntity';
+import ModelEditor from '@/components/ModelEditor.vue';
 
 export default Vue.extend({
     name: 'App',
 
-    components: { ModelList, ModelCreation },
+    components: { ModelList, ModelCreation, ModelEditor },
 
     data: () => ({
         drawer: true,
         drawerSwitch: false,
         loading: false,
 
-        edit: {
-            dialog: false,
-            index: 0,
-        },
-
         modelList: {
             visible: true,
         },
+
+        selectedModelID: -1,
 
         creation: {
             dialog: false,

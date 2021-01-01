@@ -5,7 +5,7 @@
         <v-toolbar-title>Create Model</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="create">
-          <v-icon>mdi-check</v-icon>
+          <v-icon>mdi-checkbox-marked-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
 

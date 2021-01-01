@@ -5,7 +5,7 @@
         <v-toolbar-title>Select a Model</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="submit">
-          <v-icon>mdi-check</v-icon>
+          <v-icon>mdi-checkbox-marked-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
 

@@ -2,7 +2,7 @@
   <v-slide-y-reverse-transition>
     <v-sheet v-if="show&&models.length" width="100%" class="pa-4">
       <v-row>
-        <v-item-group mandatory class="d-flex">
+        <v-item-group mandatory class="d-flex" @change="select">
           <v-item v-for="model in models" :key="model.id" v-slot="{ active, toggle }">
             <v-card :color="model.error?'#631f1f':'blue-grey darken-4'" class="ma-2" @click="toggle">
               <v-tooltip top :disabled="!model.error">
@@ -36,6 +36,7 @@ import { ModelEntity } from '@/live2d/ModelEntity';
 export default Vue.extend({
     name: "ModelList",
     props: {
+        value: Number,
         show: Boolean,
     },
     data: () => ({
@@ -43,6 +44,11 @@ export default Vue.extend({
     }),
     created() {
         this.models = this.$live2dApp.models;
+    },
+    methods: {
+        select(id: number) {
+            this.$emit('input', id);
+        },
     },
 });
 </script>

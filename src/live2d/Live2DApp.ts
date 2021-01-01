@@ -35,11 +35,16 @@ export class Live2DApp {
         return model.id;
     }
 
+    getModel(id: number) {
+        return this.models.find(m => m.id === id);
+    }
+
     private initModel(model: ModelEntity) {
         model.on('modelLoaded', (pixiModel: Live2DModel) => {
             if (!this.pixiApp.stage.children.includes(pixiModel)) {
                 this.pixiApp.stage.addChild(pixiModel);
 
+                pixiModel.position.set(this.pixiApp.renderer.width / 2, this.pixiApp.renderer.height / 2);
                 model.fit(this.pixiApp.renderer.width, this.pixiApp.renderer.height);
             }
         });
