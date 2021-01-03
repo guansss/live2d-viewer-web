@@ -7655,7 +7655,7 @@ json5@^1.0.1:
   dependencies:
     minimist "^1.2.0"
 
-json5@^2.1.2:
+json5@^2.1.2, json5@^2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.1.3.tgz#c9b0f7fa9233bfe5807fe66fcf3a5617ed597d43"
   integrity sha512-KXPvOm8K9IJKFM0bmdn8QXh7udDh1g/giieX0NLCaMnb4hEiVFqnop2ImTXCc5e0/oHz3LTqmHGtExn5hfMkOA==
@@ -8509,7 +8509,7 @@ node-dir@^0.1.17:
   dependencies:
     minimatch "^3.0.2"
 
-node-fetch@^2.1.2, node-fetch@^2.2.0, node-fetch@^2.6.0:
+node-fetch@^2.1.2, node-fetch@^2.2.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
@@ -9258,10 +9258,10 @@ pirates@^4.0.0:
   dependencies:
     node-modules-regexp "^1.0.0"
 
-pixi-live2d-display@^0.3.0-beta.1:
-  version "0.3.0-beta.1"
-  resolved "https://registry.yarnpkg.com/pixi-live2d-display/-/pixi-live2d-display-0.3.0-beta.1.tgz#f57325a1467be9814f5a12c6bce99fa98bd28ea4"
-  integrity sha512-baxzo/cwK/Mfx62DPKNtAwuzgxwXpq8zTPgkXtEt3SE6K/1sCJbM9jMXawdlnLmf7TPR6CztA7peUbTqzTCMng==
+pixi-live2d-display@^0.3.0-beta.2:
+  version "0.3.0-beta.2"
+  resolved "https://registry.yarnpkg.com/pixi-live2d-display/-/pixi-live2d-display-0.3.0-beta.2.tgz#1f64935f6eb712cd45727414d53a36cbc6376e29"
+  integrity sha512-UF+KUTt0m/qu0A7l5X75Q1rFFhe1PFpR/y4WqUXTFmvryc5Vkd8gekHWAIJPrC+Y28gpUB9nMDGHk7OuF4UDRA==
   dependencies:
     lodash latest
 

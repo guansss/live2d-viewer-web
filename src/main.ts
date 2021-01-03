@@ -2,6 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import vuetify from './plugins/vuetify';
 import { Live2DApp } from '@/live2d/Live2DApp';
+import { config } from 'pixi-live2d-display';
 
 const live2dApp = new Live2DApp(document.getElementById('canvas') as HTMLCanvasElement);
 
@@ -17,3 +18,5 @@ Vue.directive('visible', function(el, binding) {
     vuetify,
     render: h => h(App),
 }).$mount('#app');
+
+(window as any).config = config;
