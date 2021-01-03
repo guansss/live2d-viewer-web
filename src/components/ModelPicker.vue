@@ -90,8 +90,13 @@ export default Vue.extend({
     created() {
     },
     methods: {
-        fetchModels(node: TreeNode) {
-            return loadRootNode(node);
+        async fetchModels(node: TreeNode) {
+            await loadRootNode(node);
+
+            if (node.files?.length && !node.children?.length) {
+                // the children must not be empty, or TreeView won't recognize it as a open-able folder
+                node.children = [{ id: Math.random(), name: '' }];
+            }
         },
         folderOpened(openedFolders: TreeNode[]) {
             const diff = xor(openedFolders, this.openedFolders);

@@ -24,6 +24,10 @@ export function getRootNodes(): TreeNode[] {
 }
 
 export function loadRootNode(node: TreeNode): Promise<void> {
+    if (!rootNodes.includes(node)) {
+        return Promise.resolve();
+    }
+
     if (!tasks.get(node)) {
         const task = fetch(node.name.toLowerCase().replace('/', '') + '.json')
             .then(res => res.json())
