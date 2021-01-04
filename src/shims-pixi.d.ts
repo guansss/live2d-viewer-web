@@ -1,5 +1,5 @@
 declare module '@pixi/core' {
-    export { Renderer, Texture, BaseTexture } from 'pixi.js';
+    export { Renderer, Texture, BaseTexture, BatchRenderer } from 'pixi.js';
 }
 
 declare module '@pixi/utils' {

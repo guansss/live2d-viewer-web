@@ -4,12 +4,14 @@
   "author": "guansss <821143943@qq.com>",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "deploy": "node scripts/postbuild.js && gh-pages -d dist"
   },
   "main": "index.js",
   "dependencies": {
     "@types/lodash": "^4.14.166",
     "@vue/cli": "^4.5.9",
+    "gh-pages": "^3.1.0",
     "json5": "^2.1.3",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",
