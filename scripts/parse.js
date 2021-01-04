@@ -11,6 +11,22 @@ function normalize(repo) {
     return repo.toLowerCase().replace(/\//g, '');
 }
 
+const folderBlacklist = [
+    // mature models... _(:ι」∠)_
+    'UnHolY ToRturEr',
+    'LOVE³-LOVE CUBE-',
+    '[200228] [North Box] モノノ系彼女',
+    '[200229][同人ゲーム][マメック星] 雑貨屋さんの若女将 [RJ279692]',
+    '[200328][虚夢浮遊物体] ソムニア掌編―薔薇色― [RJ282471]',
+    '[200502][らぷらす] プリンセスハーレム [RJ280657]',
+    '[MountBatten] Live2Dで動くイソップ寓話',
+    '[ぬぷ竜の里] ルインズシーカー live2d',
+    '[めがみそふと] 【Live2D】コン狐との日常+(ぷらす)',
+    'カスタムcute ～俺と彼女の育成バトル！～',
+    '異世界で俺はエロ経営のトップになる！',
+    '神楽黎明記～Live2d',
+];
+
 const mocWhitelist = [
     "Sacred Sword princesses/boss_cg_live2d_h004/res/iderhelamodel.moc",
     "Sacred Sword princesses/char_cg_live2d_007/res/dorlamodel.moc",
@@ -49,10 +65,20 @@ function processTree(tree) {
     const children = [];
     const files = [];
 
-    for (const node of tree.tree) {
+    if (folderBlacklist.includes(tree.path)) {
+        return false;
+    }
+
+    mainLoop: for (const node of tree.tree) {
         processed++;
 
         if (typeof node === 'string') {
+            for (const folder of folderBlacklist) {
+                if (node.includes(folder)) {
+                    continue mainLoop;
+                }
+            }
+
             if (processFile(node, tree.tree)) {
                 files.push(node);
 
@@ -60,8 +86,9 @@ function processTree(tree) {
                 process.stdout.write('\rProcessed: ' + processed + '  Added: ' + added + '  JSONs: ' + jsons);
             }
         } else {
-            processTree(node);
-            children.push(node);
+            if (processTree(node)) {
+                children.push(node);
+            }
         }
     }
 
@@ -73,6 +100,8 @@ function processTree(tree) {
 
     delete tree.path;
     delete tree.tree;
+
+    return true;
 }
 
 function processFile(file, siblings) {
@@ -92,15 +121,16 @@ function processFile(file, siblings) {
             }
         }
 
-        const motions = exactSiblings.filter(f => f.endsWith('.mtn') || f.endsWith('.motion3.json'));
         const textures = exactSiblings.filter(f => f.endsWith('.png'));
-        const physics = exactSiblings.find(f => f.includes('physics'));
-        const pose = exactSiblings.find(f => f.includes('pose'));
 
         if (!textures.length) {
             process.stdout.write('\nMissing textures ' + file + '\n');
             return false;
         }
+
+        const motions = exactSiblings.filter(f => f.endsWith('.mtn') || f.endsWith('.motion3.json'));
+        const physics = exactSiblings.find(f => f.includes('physics'));
+        const pose = exactSiblings.find(f => f.includes('pose'));
 
         settingsJSONs[file] = file.endsWith('.moc')
             ? {
@@ -151,6 +181,8 @@ function groupByDir(files, depth) {
             } else {
                 directFiles.push(path);
             }
+        } else {
+            directFiles.push(path);
         }
     }
 
@@ -165,4 +197,5 @@ function dirname(path, offset = 0) {
 
 main();
 
+process.stdout.write('\n\n');
 console.timeEnd();

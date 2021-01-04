@@ -1,4 +1,5 @@
 scripts/*.json
+public/*.json
 
 .idea
 
