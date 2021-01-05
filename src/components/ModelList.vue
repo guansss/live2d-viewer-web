@@ -1,10 +1,11 @@
 <template>
   <v-slide-y-reverse-transition>
-    <v-sheet v-if="show&&models.length" width="100%" class="pa-4">
-      <v-row>
-        <v-item-group mandatory class="d-flex" @change="select">
-          <v-item v-for="model in models" :key="model.id" v-slot="{ active, toggle }">
-            <v-card :color="model.error?'#631f1f':'blue-grey darken-4'" class="ma-2" @click="toggle">
+    <v-sheet v-if="show&&models.length" width="100%">
+      <v-row class="ma-0">
+        <v-item-group mandatory class="model-list d-flex pa-2" :value="selectedIndex" @change="select">
+          <v-item v-for="(model,i) in models" :key="model.id" v-slot="{ active, toggle }">
+            <v-card :color="model.error?'#631f1f':active?'blue-grey darken-3':'blue-grey darken-4'" class="ma-2"
+                    @click="toggle">
               <v-tooltip top :disabled="!model.error">
                 <template v-slot:activator="{ on, attrs }">
                   <v-img contain :src="model.thumbnail" :width="model.error?undefined:model.aspectRatio*192"
@@ -17,7 +18,7 @@
                       </v-row>
                     </template>
 
-                    <v-card-title class="pa-1 subtitle-1">{{ model.name }}</v-card-title>
+                    <v-card-title class="pa-1 subtitle-1">{{ '#' + model.id + ' ' + model.name }}</v-card-title>
                   </v-img>
                 </template>
                 {{ model.error }}
@@ -43,11 +44,18 @@ export default Vue.extend({
     data: () => ({
         models: [] as ModelEntity[],
     }),
+    computed: {
+        selectedIndex() {
+            return this.models.findIndex(model => model.id === this.value);
+        },
+    },
     created() {
         this.models = this.$live2dApp.models;
     },
     methods: {
-        select(id: number) {
+        select(index: number) {
+            const id = this.models[index]?.id ?? -1;
+
             this.$emit('input', id);
         },
     },
@@ -57,4 +65,7 @@ export default Vue.extend({
 <style scoped lang="stylus">
 .v-sheet
   pointer-events auto
+
+.model-list
+  overflow auto
 </style>

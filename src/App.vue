@@ -21,7 +21,7 @@
         <v-spacer></v-spacer>
         <ModelList v-model="selectedModelID" :show="modelList.visible"/>
       </v-container>
-      <ModelCreation v-model="creation.dialog"/>
+      <ModelCreation v-model="creation.dialog" @create="selectedModelID=$event"/>
     </v-main>
     <v-fab-transition>
       <v-btn fab top left absolute dark color="accent" v-show="drawerSwitch" @click="showUI(true)">
@@ -76,7 +76,7 @@ export default Vue.extend({
     created() {
         this.models = this.$live2dApp.models;
         this.creation.dialog = true;
-    }
+    },
 });
 </script>
 

@@ -1,6 +1,8 @@
 <template>
   <v-row v-if="model" class="ma-0">
-    <v-subheader>{{ model.name }}</v-subheader>
+    <v-col cols="12">
+      <div class="display-1">{{ '#' + model.id + ' ' + model.name }}</div>
+    </v-col>
 
     <v-col cols="12">
       <v-slider dense class="pb-0" prepend-icon="mdi-magnify" v-model="model.scaleX" :messages="String(model.scaleX)"

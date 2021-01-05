@@ -5,7 +5,7 @@ import { draggable } from '@/tools';
 // 1x1 green image
 const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
 
-let uid = 0;
+let uid = 1;
 
 export class ModelEntity extends EventEmitter {
     id = uid++;
@@ -58,7 +58,9 @@ export class ModelEntity extends EventEmitter {
 
     fit(width: number, height: number) {
         if (this.pixiModel) {
-            const scale = Math.min(width / this.pixiModel.width, height / this.pixiModel.height);
+            let scale = Math.min(width / this.pixiModel.width, height / this.pixiModel.height);
+
+            scale = Math.round(scale * 10) / 10;
 
             this.scale(scale, scale);
         }

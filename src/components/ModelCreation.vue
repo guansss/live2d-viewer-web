@@ -67,9 +67,10 @@ export default Vue.extend({
                 return;
             }
 
-            this.$live2dApp.addModel(this.url);
+            const id = this.$live2dApp.addModel(this.url);
 
             this.$emit('input', false);
+            this.$emit('create', id);
         },
     },
 });
