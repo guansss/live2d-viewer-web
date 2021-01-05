@@ -1,4 +1,5 @@
 const fs = require('fs');
+const pathModule = require('path').posix;
 
 console.time();
 
@@ -28,6 +29,7 @@ const folderBlacklist = [
 ];
 
 const mocWhitelist = [
+    // these moc files are already specified in respective settings files
     "Sacred Sword princesses/boss_cg_live2d_h004/res/iderhelamodel.moc",
     "Sacred Sword princesses/char_cg_live2d_007/res/dorlamodel.moc",
     "Sacred Sword princesses/char_cg_live2d_049/res/airmanirmodel.moc",
@@ -35,6 +37,7 @@ const mocWhitelist = [
 ];
 
 const modelBlacklist = [
+    // broken file
     "Sacred Sword princesses/model.json",
 ];
 
@@ -50,7 +53,7 @@ function main() {
 
         json.path = repo;
 
-        processTree(json);
+        processTree(json, '');
 
         const content = JSON.stringify({
             models: json,
@@ -61,13 +64,15 @@ function main() {
     }
 }
 
-function processTree(tree) {
+function processTree(tree, fullPath) {
     const children = [];
     const files = [];
 
     if (folderBlacklist.includes(tree.path)) {
         return false;
     }
+
+    fullPath = pathModule.join(fullPath, tree.path);
 
     mainLoop: for (const node of tree.tree) {
         processed++;
@@ -79,14 +84,14 @@ function processTree(tree) {
                 }
             }
 
-            if (processFile(node, tree.tree)) {
+            if (processFile(node, tree.tree, fullPath)) {
                 files.push(node);
 
                 added++;
                 process.stdout.write('\rProcessed: ' + processed + '  Added: ' + added + '  JSONs: ' + jsons);
             }
         } else {
-            if (processTree(node)) {
+            if (processTree(node, fullPath)) {
                 children.push(node);
             }
         }
@@ -104,14 +109,14 @@ function processTree(tree) {
     return true;
 }
 
-function processFile(file, siblings) {
+function processFile(file, siblings, fullPath) {
     if (file.endsWith('.moc') || file.endsWith('.moc3')) {
         if (mocWhitelist.includes(file)) {
             return false;
         }
 
         // path including the last "/"
-        const dir = dirname(file, 1);
+        const dir = pathModule.dirname(file) + '/';
 
         const exactSiblings = siblings.filter(f => f.startsWith(dir)).map(f => f.slice(dir.length));
 
@@ -132,7 +137,9 @@ function processFile(file, siblings) {
         const physics = exactSiblings.find(f => f.includes('physics'));
         const pose = exactSiblings.find(f => f.includes('pose'));
 
-        settingsJSONs[file] = file.endsWith('.moc')
+        const filePath = pathModule.join(fullPath, file);
+
+        settingsJSONs[filePath] = file.endsWith('.moc')
             ? {
                 textures, pose, physics,
                 motions: motions.length ? { '': motions } : undefined,
@@ -154,7 +161,7 @@ function processFile(file, siblings) {
     return (file.endsWith('model.json') || file.endsWith('model3.json')) && !modelBlacklist.includes(file);
 }
 
-function groupByDir(files, depth) {
+function groupByDir(files) {
     const directFiles = [];
     const subTrees = [];
 
@@ -169,7 +176,7 @@ function groupByDir(files, depth) {
             if (exactSiblings.length > 1) {
                 const files1 = exactSiblings.map(path => path.slice(slashNextIndex));
 
-                const { directFiles: _directFiles, subTrees: _subTrees } = groupByDir(files1, depth + 1);
+                const { directFiles: _directFiles, subTrees: _subTrees } = groupByDir(files1);
 
                 subTrees.push({
                     name: dir.slice(0, -1),
@@ -187,12 +194,6 @@ function groupByDir(files, depth) {
     }
 
     return { directFiles, subTrees };
-}
-
-function dirname(path, offset = 0) {
-    const index = path.lastIndexOf('/');
-
-    return index > -1 ? path.slice(0, index + offset) : path;
 }
 
 main();

@@ -2,14 +2,56 @@ import { Cubism2ModelSettings, Cubism2Spec, Cubism4ModelSettings, CubismSpec } f
 import JSON5 from 'json5';
 import { ping } from '@/utils';
 import { url as urlUtils } from '@pixi/utils';
+import { getSettingsJSON } from '@/data/model';
+import { CommonModelJSON } from '@/global';
 
-export async function createSettingsJSON(jsonText: string, url: string) {
-    jsonText = replaceJSONText(jsonText, url);
+export async function createSettingsJSON(url: string) {
+    let json: CommonModelJSON;
 
-    // some JSONs are poorly formatted, but can possibly be parsed by JSON5
-    const json = JSON5.parse(jsonText);
+    if (url.endsWith('.moc') || url.endsWith('.moc3')) {
+        json = getSettingsJSON(url) as NonNullable<ReturnType<typeof getSettingsJSON>>;
 
-    json.url = url;
+        if (!json) {
+            throw new Error('Cannot find settings JSON from moc');
+        }
+
+        if (url.endsWith('moc3')) {
+            json.url = urlUtils.resolve(url, 'dummy.model3.json');
+
+            const json3 = json as CubismSpec.ModelJSON;
+
+            json3.FileReferences.Moc = url;
+
+            // construct motion definitions from the plain string array
+            if (json3.FileReferences.Motions?.['']?.length) {
+                json3.FileReferences.Motions[''] = json3.FileReferences.Motions[''].map(
+                    motionFile => ({ File: motionFile as any as string }),
+                );
+            }
+        } else {
+            json.url = urlUtils.resolve(url, 'dummy.model.json');
+
+            const json2 = json as Cubism2Spec.ModelJSON;
+
+            json2.model = url;
+
+            // construct motion definitions from the plain string array
+            if (json2.motions?.['']?.length) {
+                json2.motions[''] = json2.motions[''].map(
+                    motionFile => ({ file: motionFile as any as string }),
+                );
+            }
+        }
+    } else {
+        let jsonText = await fetch(url).then(res => res.text());
+
+        jsonText = replaceJSONText(jsonText, url);
+
+        // some JSONs are poorly formatted, but can possibly be parsed by JSON5
+        json = JSON5.parse(jsonText);
+
+        json.url = url;
+    }
 
     await patchJSON(json, url);
 
@@ -42,12 +84,6 @@ const patches: {
     replace?: (jsonText: string, url: string) => string;
     patch?: (json: any, url: string) => void | Promise<void>;
 }[] = [{
-    search: '碧蓝航线', // 碧蓝航线 Azur Lane
-
-    patch(json: Partial<CubismSpec.ModelJSON>) {
-        extractCubism4IdleMotions(json, ['idle', 'home']);
-    },
-}, {
     search: '魂器学院', // 魂器学院 Horcrux College
 
     replace(jsonText: string) {
@@ -86,6 +122,8 @@ const patches: {
                 }
             }
         }
+
+        extractCubism2IdleMotions(json, ['daiji']);
     },
 }, {
     search: 'アンノウンブライド', // アンノウンブライド Unknown Bride
@@ -103,12 +141,6 @@ const patches: {
 
         // extract idle motions
         extractCubism4IdleMotions(json, ['home', 'gacha']);
-    },
-}, {
-    search: '少女咖啡枪', // 少女咖啡枪 Girl Cafe Gun
-
-    patch(json: Partial<CubismSpec.ModelJSON>) {
-        extractCubism4IdleMotions(json, ['stand']);
     },
 }, {
     search: '凍京', // 凍京Nerco TokyoNerco
@@ -168,6 +200,24 @@ const patches: {
         }
     },
 }, {
+    search: '碧蓝航线', // 碧蓝航线 Azur Lane
+
+    patch(json: Partial<CubismSpec.ModelJSON>) {
+        extractCubism4IdleMotions(json, ['idle', 'home']);
+    },
+}, {
+    search: '少女咖啡枪', // 少女咖啡枪 Girl Cafe Gun
+
+    patch(json: Partial<CubismSpec.ModelJSON>) {
+        extractCubism4IdleMotions(json, ['stand']);
+    },
+}, {
+    search: 'princesses', // Sacred Sword Princesses
+
+    patch(json: Partial<Cubism2Spec.ModelJSON>) {
+        extractCubism2IdleMotions(json, ['default', 'loop']);
+    },
+}, {
     search: '崩坏', // 崩坏2 Honkai Impact 2
 
     patch(json: Partial<Cubism2Spec.ModelJSON>) {
@@ -190,13 +240,41 @@ const patches: {
 /**
  * Sets a motion as the idle motion if it's the only one in this model.
  */
-function setSingleMotionAsIdle(json: Partial<CubismSpec.ModelJSON>) {
-    const motions = json.FileReferences?.Motions as Record<string, CubismSpec.Motion[]>;
+function setSingleMotionAsIdle(json: Partial<CommonModelJSON>) {
+    const motions = (json as CubismSpec.ModelJSON).FileReferences?.Motions;
 
     if (motions) {
         if (!motions.Idle?.[0] && motions['']?.length === 1) {
             // deep clone the array
             motions.Idle = motions[''].map(motion => ({ ...motion }));
+        }
+    }
+}
+
+/**
+ * Extracts non-standard idle motions into the "idle" group.
+ *
+ * @param json
+ * @param keywords Strings in lowercase.
+ */
+function extractCubism2IdleMotions(json: Partial<Cubism2Spec.ModelJSON>, keywords: string[]) {
+    if (json.motions) {
+        const idleMotions: Cubism2Spec.Motion[] = [];
+
+        for (const [group, motions] of Object.entries(json.motions)) {
+            if (group !== 'idle' && Array.isArray(motions)) {
+                for (const motion of motions) {
+                    for (const keyword of keywords) {
+                        if (motion.file && motion.file.toLowerCase().includes(keyword)) {
+                            idleMotions.push(motion);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (idleMotions) {
+            json.motions.idle = (json.motions.idle || []).concat(idleMotions);
         }
     }
 }

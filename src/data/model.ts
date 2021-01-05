@@ -1,3 +1,5 @@
+import { CommonModelJSON } from '@/global';
+
 export interface TreeNode {
     id: number;
     name: string;
@@ -7,6 +9,8 @@ export interface TreeNode {
 
 let uid = 0;
 
+const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/';
+
 const tasks = new Map<TreeNode, Promise<void>>();
 
 const rootNodes: TreeNode[] = [{
@@ -15,6 +19,8 @@ const rootNodes: TreeNode[] = [{
     children: [],
     files: [],
 }];
+
+const settingsJSONs: Record<string, CommonModelJSON> = {};
 
 // preload
 rootNodes.forEach(loadRootNode);
@@ -36,7 +42,9 @@ export function loadRootNode(node: TreeNode): Promise<void> {
                 node.children = data.models.children;
                 node.files = data.models.files;
 
-                forEachNode(node, n => n.id = uid++);
+                traverseNode(node, n => n.id = uid++);
+
+                Object.assign(settingsJSONs, data.settings);
             });
 
         tasks.set(node, task);
@@ -47,12 +55,12 @@ export function loadRootNode(node: TreeNode): Promise<void> {
     return tasks.get(node)!;
 }
 
-export function forEachNode(node: TreeNode, fn: (node: TreeNode) => void) {
+export function traverseNode(node: TreeNode, fn: (node: TreeNode) => void) {
     fn(node);
 
     if (node.children) {
         for (const child of node.children) {
-            forEachNode(child, fn);
+            traverseNode(child, fn);
         }
     }
 }
@@ -71,7 +79,7 @@ export function getAlternativeURL(url: string): string {
     // raw: "https://cdn.jsdelivr.net/gh/<repo>/<file>"
     // alt: "https://raw.githubusercontent.com/<repo>/master/<file>"
 
-    const repoAndFile = url.replace('https://cdn.jsdelivr.net/gh/', '');
+    const repoAndFile = url.replace(JSDELIVR_PREFIX, '');
     const names = repoAndFile.split('/');
     const repo = names.slice(0, 2).join('/');
     const file = names.slice(2).join('/');
@@ -97,4 +105,30 @@ export function getNodePath(node: TreeNode): string | undefined {
     };
 
     return search(rootNodes);
+}
+
+export function validateURL(url: string): string | undefined {
+    if (url.endsWith('model.json') || url.endsWith('model3.json')) {
+        return;
+    }
+
+    if (url.endsWith('.moc') || url.endsWith('.moc3')) {
+        if (getSettingsJSON(url)) {
+            return;
+        }
+
+        return 'Error: Cannot display a moc file that doesn\'t belong to any resource repository';
+    }
+
+    return 'Warning: Unknown URL. The model may not be loaded correctly';
+}
+
+export function getSettingsJSON(mocURL: string): CommonModelJSON | undefined {
+    if (mocURL.startsWith(JSDELIVR_PREFIX)) {
+        let mocFile = mocURL.replace(JSDELIVR_PREFIX, '');
+
+        mocFile = decodeURI(mocFile);
+
+        return settingsJSONs[mocFile];
+    }
 }

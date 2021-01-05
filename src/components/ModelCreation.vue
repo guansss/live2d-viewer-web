@@ -11,7 +11,8 @@
 
       <v-card-text class="pa-8">
         <v-row>
-          <v-text-field label="URL" single-line filled v-model="url" :rules="urlRules"></v-text-field>
+          <v-text-field label="URL" single-line filled v-model="url" :messages="urlMessages"
+                        :error="urlError"></v-text-field>
         </v-row>
         <v-row>
           <v-spacer></v-spacer>
@@ -31,6 +32,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import ModelPicker from './ModelPicker.vue';
+import { validateURL } from '@/data/model';
 
 export default Vue.extend({
     components: { ModelPicker },
@@ -46,15 +48,22 @@ export default Vue.extend({
             dialog: false,
         },
 
-        urlRules: [
-            (url: string) => url.endsWith('model.json') || url.endsWith('model3.json') || 'Model file must end with .model.json or .model3.json',
-        ],
+        urlError: false,
+        urlMessages: [] as string[],
     }),
+    watch: {
+        url(value) {
+            const message = validateURL(value) || '';
+
+            this.urlError = /error/i.test(message);
+            this.urlMessages = [message].filter(Boolean);
+        },
+    },
     methods: {
         create() {
             this.url = this.url.replace(/\s/, '');
 
-            if (!this.urlRules.every(rule => rule(this.url))) {
+            if (this.urlError) {
                 return;
             }
 
