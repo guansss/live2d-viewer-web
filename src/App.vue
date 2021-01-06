@@ -83,6 +83,16 @@ export default Vue.extend({
 <style scoped lang="stylus">
 .v-main
   padding-left 360px !important
+
+>>> .v-navigation-drawer__content
+  display flex
+  flex-direction column
+
+  .v-toolbar
+    flex-grow initial !important
+
+.model-editor
+  overflow auto
 </style>
 
 <style lang="stylus">
