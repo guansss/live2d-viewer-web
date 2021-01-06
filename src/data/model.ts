@@ -120,7 +120,7 @@ export function validateURL(url: string): string | undefined {
         return 'Error: Cannot display a moc file that doesn\'t belong to any resource repository';
     }
 
-    return 'Warning: Unknown URL. The model may not be loaded correctly';
+    return 'Warning: Unknown URL type. The model may not be loaded correctly';
 }
 
 export function getSettingsJSON(mocURL: string): CommonModelJSON | undefined {

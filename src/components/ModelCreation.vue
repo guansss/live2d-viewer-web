@@ -63,6 +63,11 @@ export default Vue.extend({
         create() {
             this.url = this.url.replace(/\s/, '');
 
+            if (!this.url) {
+                this.urlError = true;
+                this.urlMessages = ['Please enter a URL'];
+            }
+
             if (this.urlError) {
                 return;
             }
