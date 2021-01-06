@@ -7,6 +7,7 @@ import { InteractionManager } from '@pixi/interaction';
 import { config } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import { settings } from '@pixi/settings';
+import pull from 'lodash/pull';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -51,30 +52,42 @@ export class Live2DApp {
                 pixiModel.position.set(this.pixiApp.renderer.width / 2, this.pixiApp.renderer.height / 2);
                 model.fit(this.pixiApp.renderer.width, this.pixiApp.renderer.height);
 
-                model.thumbnail = this.createThumbnail(pixiModel);
+                try {
+                    model.thumbnail = this.createThumbnail(pixiModel);
+                } catch (e) {
+                    model.error = e.message;
+                }
             }
         });
     }
 
-    createThumbnail(pixiModel: Live2DModel) {
+    createThumbnail(pixiModel: Live2DModel): string {
+        let dataURL: string | undefined;
+
         settings.RESOLUTION = 0.2;
+        pixiModel.hitAreaFrames.visible = false;
 
-        const dataURL = this.pixiApp.renderer.extract.base64(pixiModel, 'image/webp', 0.01);
-
-        settings.RESOLUTION = 1;
+        try {
+            dataURL = this.pixiApp.renderer.extract.base64(pixiModel, 'image/webp', 0.01);
+        } finally {
+            settings.RESOLUTION = 1;
+            pixiModel.hitAreaFrames.visible = true;
+        }
 
         return dataURL;
     }
 
-    destroyModel(id: number) {
+    removeModel(id: number) {
         const model = this.models.find(model => model.id === id);
 
         if (model) {
-            model.destroy();
+            pull(this.models, model);
 
             if (model.pixiModel) {
                 this.pixiApp.stage.removeChild(model.pixiModel);
             }
+
+            model.destroy();
         }
     }
 }

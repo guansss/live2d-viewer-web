@@ -102,6 +102,7 @@ export class ModelEntity extends EventEmitter {
     destroy() {
         if (this.pixiModel) {
             this.pixiModel.destroy({ children: true });
+            this.pixiModel = undefined;
         }
     }
 
