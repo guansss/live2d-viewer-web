@@ -203,7 +203,7 @@ const patches: {
     search: '碧蓝航线', // 碧蓝航线 Azur Lane
 
     patch(json: Partial<CubismSpec.ModelJSON>) {
-        extractCubism4IdleMotions(json, ['idle', 'home']);
+        extractCubism4IdleMotions(json, ['idle']);
     },
 }, {
     search: '少女咖啡枪', // 少女咖啡枪 Girl Cafe Gun
