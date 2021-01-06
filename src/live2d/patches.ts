@@ -273,7 +273,7 @@ function extractCubism2IdleMotions(json: Partial<Cubism2Spec.ModelJSON>, keyword
             }
         }
 
-        if (idleMotions) {
+        if (idleMotions.length) {
             json.motions.idle = (json.motions.idle || []).concat(idleMotions);
         }
     }
@@ -301,7 +301,7 @@ function extractCubism4IdleMotions(json: Partial<CubismSpec.ModelJSON>, keywords
             }
         }
 
-        if (idleMotions) {
+        if (idleMotions.length) {
             json.FileReferences.Motions.Idle = (json.FileReferences.Motions.Idle || []).concat(idleMotions);
         }
     }
