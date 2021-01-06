@@ -127,6 +127,8 @@ export default Vue.extend({
                 this.model.off('modelLoaded', this.pixiModelLoaded);
 
                 this.motionGroups = [];
+                this.motionState = undefined;
+                this.model = undefined;
             }
         },
         pixiModelLoaded(pixiModel: Live2DModel) {

@@ -67,6 +67,10 @@ export default Vue.extend({
         },
         remove(id: number) {
             this.$live2dApp.removeModel(id);
+
+            if (this.models.length === 0) {
+                this.$emit('input', -1);
+            }
         },
     },
 });
