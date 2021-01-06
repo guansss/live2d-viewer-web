@@ -1,6 +1,9 @@
 <template>
   <div class="model-editor" v-if="model">
-    <div class="model-title pa-2 text-h5">{{ '#' + model.id + ' ' + model.name }}</div>
+    <div class="pa-2 d-flex align-center">
+      <div class="text-h4">{{ '#' + model.id }}</div>
+    </div>
+    <div class="pa-2 text-h5">{{ model.name }}</div>
 
     <v-list expand>
       <v-list-group :value="true">

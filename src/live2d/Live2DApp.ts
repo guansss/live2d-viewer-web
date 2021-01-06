@@ -7,7 +7,6 @@ import { InteractionManager } from '@pixi/interaction';
 import { config } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import { settings } from '@pixi/settings';
-import pull from 'lodash/pull';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -81,7 +80,7 @@ export class Live2DApp {
         const model = this.models.find(model => model.id === id);
 
         if (model) {
-            pull(this.models, model);
+            this.models.splice(this.models.indexOf(model), 1);
 
             if (model.pixiModel) {
                 this.pixiApp.stage.removeChild(model.pixiModel);
