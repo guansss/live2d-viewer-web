@@ -4,6 +4,9 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Live2D Viewer</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-btn icon href="https://github.com/guansss/live2d-viewer-web">
+          <v-icon>mdi-github</v-icon>
+        </v-btn>
         <v-btn icon @click="creation.dialog=true">
           <v-icon>mdi-plus</v-icon>
         </v-btn>

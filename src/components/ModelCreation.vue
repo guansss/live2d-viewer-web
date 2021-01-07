@@ -10,7 +10,7 @@
       </v-toolbar>
 
       <v-card-text class="pa-8">
-        <v-text-field label="URL" single-line filled v-model="url" :messages="urlMessages"
+        <v-text-field single-line filled prepend-icon="mdi-link" label="URL" v-model="url" :messages="urlMessages"
                       :error="urlError"></v-text-field>
 
         <div class="d-flex mb-4">
@@ -23,7 +23,7 @@
           </v-btn>
         </div>
 
-        <v-file-input multiple filled show-size
+        <v-file-input multiple filled show-size prepend-icon="mdi-file-upload"
                       placeholder="Not implemented yet, please just drag and drop all the files into this page"
                       v-model="inputFiles" @click.native.capture="fileInputClicked"></v-file-input>
       </v-card-text>

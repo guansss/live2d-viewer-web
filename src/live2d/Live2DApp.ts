@@ -28,6 +28,7 @@ export class Live2DApp {
         this.pixiApp = new Application({
             view: canvas,
             resizeTo: window,
+            antialias: true,
         });
         this.pixiApp.stage.interactive = true;
     }
