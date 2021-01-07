@@ -35,23 +35,28 @@ export class Live2DApp {
     }
 
     addModel(url: string): number {
-        const model = new ModelEntity(url);
+        return this.createModel(url);
+    }
+
+    addModels(files: File[]): void {
+        if (files.length === 1 && files[0].name.endsWith('.zip')) {
+            this.createModel(files);
+        } else {
+            const fileGroups = splitFilesBySettingsFile(files);
+
+            for (const fileGroup of fileGroups) {
+                this.createModel(fileGroup);
+            }
+        }
+    }
+
+    createModel(source: string | File[]): number {
+        const model = new ModelEntity(source);
 
         this.initModel(model);
         this.models.push(model);
 
         return model.id;
-    }
-
-    addModels(files: File[]): void {
-        const fileGroups = splitFilesBySettingsFile(files);
-
-        for (const fileGroup of fileGroups) {
-            const model = new ModelEntity(files);
-
-            this.initModel(model);
-            this.models.push(model);
-        }
     }
 
     getModel(id: number) {

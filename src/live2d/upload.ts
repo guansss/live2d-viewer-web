@@ -54,6 +54,9 @@ export async function validateUploadedFiles(files: File[]): Promise<File[]> {
         }
 
         return [...filesSet];
+    } else if (files.length === 1 && files[0].name.endsWith('.zip')) {
+        // just let it go...
+        return files;
     } else {
         // will throw an error if it fails
         createSettingsFromFiles(files);

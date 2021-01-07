@@ -14,19 +14,31 @@ import { getFiles } from '@/live2d/FileLoader';
 
 class ZipLoader {
     static factory: Middleware<Live2DFactoryContext> = async (context, next) => {
-        if (typeof context.source === 'string' && context.source.endsWith('.zip')) {
-            const url = context.source;
+        const source = context.source;
 
-            const blob = await fetch(url).then(res => res.blob());
+        let zipBlob: Blob | undefined;
 
-            if (!blob.size) {
-                throw new Error('Empty response');
+        if (typeof source === 'string' && source.endsWith('.zip')) {
+            zipBlob = await fetch(source).then(res => res.blob());
+        } else if (
+            Array.isArray(source)
+            && source.length === 1
+            && source[0] instanceof File
+            && source[0].name.endsWith('.zip')
+        ) {
+            zipBlob = source[0];
+        }
+
+        if (zipBlob) {
+            if (!zipBlob.size) {
+                throw new Error('Empty zip file');
             }
 
-            const jszip = await JSZip.loadAsync(blob);
+            const jszip = await JSZip.loadAsync(zipBlob);
 
             const files = await ZipLoader.unzip(jszip);
 
+            // pass files to the FileLoader
             context.source = files;
         }
 
@@ -85,6 +97,7 @@ class ZipLoader {
 
         const settingsJSON = JSON.parse(settingsText) as Partial<CommonModelJSON>;
 
+        // url must be a string, even if empty
         settingsJSON.url = '';
 
         let settings: Cubism2ModelSettings | Cubism4ModelSettings;
