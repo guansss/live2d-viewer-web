@@ -1,4 +1,4 @@
-scripts/*.json
+scripts/**/*.json
 public/*.json
 
 .idea

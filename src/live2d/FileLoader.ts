@@ -76,7 +76,7 @@ import { url as urlUtils } from '@pixi/utils';
     }
 };
 
-function getFiles(settings: ModelSettings): string[] {
+export function getFiles(settings: ModelSettings): string[] {
     const files: string[] = [];
 
     (settings as any).replaceFiles((file: string, path: string) => {

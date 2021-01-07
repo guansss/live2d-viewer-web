@@ -62,7 +62,7 @@ async function fetchTree(tree, skipRecursive) {
 async function fetchJSON(url) {
     console.log('fetch', url);
 
-    const file = 'json/' + normalize(url.slice('https://api.github.com/repos/'.length).replace('?recursive=true', '-rec')) + '.json';
+    const file = 'cache/' + normalize(url.slice('https://api.github.com/repos/'.length).replace('?recursive=true', '-rec')) + '.json';
 
     if (fs.existsSync(file)) {
         console.log('Read cache', file);

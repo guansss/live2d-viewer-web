@@ -8,6 +8,7 @@ import { config } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import { settings } from '@pixi/settings';
 import './patches';
+import './zip';
 import { splitFilesBySettingsFile } from '@/live2d/upload';
 
 Application.registerPlugin(TickerPlugin as any);

@@ -36,9 +36,12 @@ const mocWhitelist = [
     "Sacred Sword princesses/char_cg_live2d_h048/res/ainir.moc",
 ];
 
-const modelBlacklist = [
+const fileBlacklist = [
     // broken file
     "Sacred Sword princesses/model.json",
+
+    // non-model zip
+    '少女咖啡枪 girls cafe gun/UnityLive2DExtractor+for+ガール・カフェ・ガン.zip',
 ];
 
 const settingsJSONs = {};
@@ -158,7 +161,11 @@ function processFile(file, siblings, fullPath) {
         return true;
     }
 
-    return (file.endsWith('model.json') || file.endsWith('model3.json')) && !modelBlacklist.includes(file);
+    if (fileBlacklist.includes(fullPath + '/' + file)) {
+        return false;
+    }
+
+    return file.endsWith('model.json') || file.endsWith('model3.json') || file.endsWith('.zip');
 }
 
 function groupByDir(files) {

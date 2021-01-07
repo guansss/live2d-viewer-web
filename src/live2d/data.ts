@@ -1,4 +1,5 @@
 import { CommonModelJSON } from '@/global';
+import { isMocFile, isSettingsFile } from '@/live2d/helpers';
 
 export interface TreeNode {
     id: number;
@@ -108,11 +109,11 @@ export function getNodePath(node: TreeNode): string | undefined {
 }
 
 export function validateURL(url: string): string | undefined {
-    if (url.endsWith('model.json') || url.endsWith('model3.json')) {
+    if (isSettingsFile(url) || url.endsWith('.zip')) {
         return;
     }
 
-    if (url.endsWith('.moc') || url.endsWith('.moc3')) {
+    if (isMocFile(url)) {
         if (getSettingsJSON(url)) {
             return;
         }

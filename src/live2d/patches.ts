@@ -12,6 +12,7 @@ import { ping } from '@/utils';
 import { url as urlUtils } from '@pixi/utils';
 import { getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
+import { isMocFile, isMocFileV3 } from '@/live2d/helpers';
 
 // replace the default urlToJSON middleware
 Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(defaultURLToJSON), 1, urlToJSON);
@@ -23,14 +24,14 @@ async function urlToJSON(context: Live2DFactoryContext, next: (err?: any) => Pro
 
         let json: CommonModelJSON;
 
-        if (url.endsWith('.moc') || url.endsWith('.moc3')) {
+        if (isMocFile(url)) {
             json = getSettingsJSON(url) as NonNullable<ReturnType<typeof getSettingsJSON>>;
 
             if (!json) {
                 throw new Error('Cannot find settings JSON from moc');
             }
 
-            if (url.endsWith('moc3')) {
+            if (isMocFileV3(url)) {
                 json.url = urlUtils.resolve(url, 'dummy.model3.json');
 
                 const json3 = json as CubismSpec.ModelJSON;
