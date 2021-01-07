@@ -1,67 +1,88 @@
-import { Cubism2ModelSettings, Cubism2Spec, Cubism4ModelSettings, CubismSpec } from 'pixi-live2d-display';
+import {
+    Cubism2ModelSettings,
+    Cubism2Spec,
+    Cubism4ModelSettings,
+    CubismSpec,
+    Live2DFactory,
+    Live2DFactoryContext,
+    urlToJSON as defaultURLToJSON,
+} from 'pixi-live2d-display';
 import JSON5 from 'json5';
 import { ping } from '@/utils';
 import { url as urlUtils } from '@pixi/utils';
-import { getSettingsJSON } from '@/data/model';
+import { getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
 
-export async function createSettingsJSON(url: string) {
-    let json: CommonModelJSON;
+// replace the default urlToJSON middleware
+Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(defaultURLToJSON), 1, urlToJSON);
 
-    if (url.endsWith('.moc') || url.endsWith('.moc3')) {
-        json = getSettingsJSON(url) as NonNullable<ReturnType<typeof getSettingsJSON>>;
+async function urlToJSON(context: Live2DFactoryContext, next: (err?: any) => Promise<void>) {
+    if (typeof context.source === 'string') {
 
-        if (!json) {
-            throw new Error('Cannot find settings JSON from moc');
-        }
+        const url = context.source;
 
-        if (url.endsWith('moc3')) {
-            json.url = urlUtils.resolve(url, 'dummy.model3.json');
+        let json: CommonModelJSON;
 
-            const json3 = json as CubismSpec.ModelJSON;
+        if (url.endsWith('.moc') || url.endsWith('.moc3')) {
+            json = getSettingsJSON(url) as NonNullable<ReturnType<typeof getSettingsJSON>>;
 
-            json3.FileReferences.Moc = url;
+            if (!json) {
+                throw new Error('Cannot find settings JSON from moc');
+            }
 
-            // construct motion definitions from the plain string array
-            if (json3.FileReferences.Motions?.['']?.length) {
-                json3.FileReferences.Motions[''] = json3.FileReferences.Motions[''].map(
-                    motionFile => ({ File: motionFile as any as string }),
-                );
+            if (url.endsWith('moc3')) {
+                json.url = urlUtils.resolve(url, 'dummy.model3.json');
+
+                const json3 = json as CubismSpec.ModelJSON;
+
+                json3.FileReferences.Moc = url;
+
+                // construct motion definitions from the plain string array
+                if (json3.FileReferences.Motions?.['']?.length && typeof json3.FileReferences.Motions[''][0] === 'string') {
+                    json3.FileReferences.Motions[''] = json3.FileReferences.Motions[''].map(
+                        motionFile => ({ File: motionFile as any as string }),
+                    );
+                }
+            } else {
+                json.url = urlUtils.resolve(url, 'dummy.model.json');
+
+                const json2 = json as Cubism2Spec.ModelJSON;
+
+                json2.model = url;
+
+                // construct motion definitions from the plain string array
+                if (json2.motions?.['']?.length && typeof json2.motions[''][0] === 'string') {
+                    json2.motions[''] = json2.motions[''].map(
+                        motionFile => ({ file: motionFile as any as string }),
+                    );
+                }
             }
         } else {
-            json.url = urlUtils.resolve(url, 'dummy.model.json');
+            let jsonText = await fetch(url).then(res => res.text());
 
-            const json2 = json as Cubism2Spec.ModelJSON;
+            jsonText = replaceJSONText(jsonText, url);
 
-            json2.model = url;
+            // some JSONs are poorly formatted, but can possibly be parsed by JSON5
+            json = JSON5.parse(jsonText);
 
-            // construct motion definitions from the plain string array
-            if (json2.motions?.['']?.length) {
-                json2.motions[''] = json2.motions[''].map(
-                    motionFile => ({ file: motionFile as any as string }),
-                );
-            }
+            json.url = url;
         }
-    } else {
-        let jsonText = await fetch(url).then(res => res.text());
 
-        jsonText = replaceJSONText(jsonText, url);
+        await patchJSON(json, url);
 
-        // some JSONs are poorly formatted, but can possibly be parsed by JSON5
-        json = JSON5.parse(jsonText);
+        setSingleMotionAsIdle(json);
 
-        json.url = url;
+        context.source = json;
+
+        console.log(json);
+
+        context.live2dModel.emit('settingsJSONLoaded', json);
     }
 
-    await patchJSON(json, url);
-
-    setSingleMotionAsIdle(json);
-
-    console.log(json);
-    return json;
+    return next();
 }
 
-export function replaceJSONText(jsonText: string, url: string) {
+function replaceJSONText(jsonText: string, url: string) {
     for (const patch of patches) {
         if (url.includes(encodeURI(patch.search)) && patch.replace) {
             jsonText = patch.replace(jsonText, url);
@@ -71,7 +92,7 @@ export function replaceJSONText(jsonText: string, url: string) {
     return jsonText;
 }
 
-export async function patchJSON(json: any, url: string) {
+async function patchJSON(json: any, url: string) {
     for (const patch of patches) {
         if (url.includes(encodeURI(patch.search)) && patch.patch) {
             await patch.patch(json, url);
