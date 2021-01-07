@@ -42,6 +42,40 @@ import { url as urlUtils } from '@pixi/utils';
     }
 };
 
+(Cubism4ModelSettings.prototype as any).replaceFiles = function(this: Cubism4ModelSettings, replace: (file: string, path: string) => string) {
+    this.moc = replace(this.moc, 'moc');
+
+    if (this.pose !== undefined) {
+        (this.pose = replace(this.pose, 'pose'));
+    }
+
+    if (this.physics !== undefined) {
+        (this.physics = replace(this.physics, 'physics'));
+    }
+
+    for (let i = 0; i < this.textures.length; i++) {
+        this.textures[i] = replace(this.textures[i]!, `textures[${i}]`);
+    }
+
+    if (this.motions) {
+        for (const [group, motions] of Object.entries(this.motions)) {
+            for (let i = 0; i < motions.length; i++) {
+                motions[i]!.File = replace(motions[i]!.File, `motions.${group}[${i}].File`);
+
+                if (motions[i]!.Sound !== undefined) {
+                    motions[i]!.Sound = replace(motions[i]!.Sound!, `motions.${group}[${i}].Sound`);
+                }
+            }
+        }
+    }
+
+    if (this.expressions) {
+        for (let i = 0; i < this.expressions.length; i++) {
+            this.expressions[i]!.File = replace(this.expressions[i]!.File, `expressions[${i}]`);
+        }
+    }
+};
+
 function getFiles(settings: ModelSettings): string[] {
     const files: string[] = [];
 
@@ -150,7 +184,7 @@ export class FileLoader {
      * Builds a `ModelSettings` from given files. A settings file must be included in the files.
      */
     static async createSettings(files: File[]): Promise<ModelSettings> {
-        const settingsFile = files.find(file => file.name.endsWith('.model.json') ?? file.name.endsWith('.model3.json'));
+        const settingsFile = files.find(file => file.name.endsWith('.model.json') || file.name.endsWith('.model3.json'));
 
         if (!settingsFile) {
             throw new TypeError('Settings file not found');
