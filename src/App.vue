@@ -23,11 +23,21 @@
       </v-container>
       <ModelCreation v-model="creation.dialog" @create="selectedModelID=$event"/>
     </v-main>
+
     <v-fab-transition>
       <v-btn fab top left absolute dark color="accent" v-show="drawerSwitch" @click="showUI(true)">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
     </v-fab-transition>
+
+    <ModelDropZone @upload="upload" @error="error"/>
+
+    <v-snackbar v-model="snackbar.visible" timeout="-1">
+      {{ snackbar.message }}
+      <template v-slot:action="{ attrs }">
+        <v-btn icon v-bind="attrs" @click="snackbar.visible=false"><v-icon>mdi-close</v-icon></v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -37,11 +47,12 @@ import ModelList from './components/ModelList.vue';
 import ModelCreation from './components/ModelCreation.vue';
 import { ModelEntity } from '@/live2d/ModelEntity';
 import ModelEditor from '@/components/ModelEditor.vue';
+import ModelDropZone from '@/components/ModelDropZone.vue';
 
 export default Vue.extend({
     name: 'App',
 
-    components: { ModelList, ModelCreation, ModelEditor },
+    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone },
 
     data: () => ({
         drawer: true,
@@ -59,6 +70,13 @@ export default Vue.extend({
             result: null,
         },
 
+        drop: {},
+
+        snackbar: {
+            visible: false,
+            message: '',
+        },
+
         models: [] as ModelEntity[],
     }),
     computed: {},
@@ -68,6 +86,17 @@ export default Vue.extend({
             this.drawer = show;
             this.modelList.visible = show;
             this.drawerSwitch = false;
+        },
+        upload(files: File[]) {
+            this.$live2dApp.addModels(files);
+        },
+        error(e: any) {
+            const message = e && e.message || e + '';
+
+            if (message) {
+                this.snackbar.message = message;
+                this.snackbar.visible = true;
+            }
         },
         log(...args: any[]) {
             console.log(...args);

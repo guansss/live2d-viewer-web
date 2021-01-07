@@ -26,17 +26,21 @@ export class ModelEntity extends EventEmitter {
 
     pixiModel?: Live2DModel;
 
-    constructor(url: string) {
+    constructor(source: string | File[]) {
         super();
 
-        this.url = url;
-
-        this.loadModel().then();
+        this.loadModel(source).then();
     }
 
-    async loadModel() {
+    async loadModel(source: string | File[]) {
+        if (typeof source === 'string') {
+            this.url = source;
+        } else {
+            this.url = '(Local files)';
+        }
+
         try {
-            this.pixiModel = await Live2DModel.from(this.url);
+            this.pixiModel = await Live2DModel.from(source);
         } catch (e) {
             this.error = e instanceof Error ? e.message : e + '';
         }

@@ -7,6 +7,8 @@ import { InteractionManager } from '@pixi/interaction';
 import { config } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import { settings } from '@pixi/settings';
+import './patches';
+import { splitFilesBySettingsFile } from '@/live2d/upload';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -37,6 +39,17 @@ export class Live2DApp {
         this.models.push(model);
 
         return model.id;
+    }
+
+    addModels(files: File[]): void {
+        const fileGroups = splitFilesBySettingsFile(files);
+
+        for (const fileGroup of fileGroups) {
+            const model = new ModelEntity(files);
+
+            this.initModel(model);
+            this.models.push(model);
+        }
     }
 
     getModel(id: number) {

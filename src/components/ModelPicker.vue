@@ -52,7 +52,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import xor from 'lodash/xor';
-import { getFileURL, getRootNodes, loadRootNode, TreeNode } from '@/data/model';
+import { getFileURL, getRootNodes, loadRootNode, TreeNode } from '@/live2d/data';
 
 export default Vue.extend({
     name: "ModelPicker",

@@ -10,11 +10,10 @@
       </v-toolbar>
 
       <v-card-text class="pa-8">
-        <v-row>
-          <v-text-field label="URL" single-line filled v-model="url" :messages="urlMessages"
-                        :error="urlError"></v-text-field>
-        </v-row>
-        <v-row>
+        <v-text-field label="URL" single-line filled v-model="url" :messages="urlMessages"
+                      :error="urlError"></v-text-field>
+
+        <div class="d-flex mb-4">
           <v-spacer></v-spacer>
           <v-btn color="blue-grey" @click="picker.dialog=true">
             From source...
@@ -22,7 +21,11 @@
               mdi-cloud-search
             </v-icon>
           </v-btn>
-        </v-row>
+        </div>
+
+        <v-file-input multiple filled show-size
+                      placeholder="Not implemented yet, please just drag and drop all the files into this page"
+                      v-model="inputFiles" @click.native.capture="fileInputClicked"></v-file-input>
       </v-card-text>
     </v-card>
     <ModelPicker v-model="picker.dialog" @select="url=$event"/>
@@ -32,7 +35,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import ModelPicker from './ModelPicker.vue';
-import { validateURL } from '@/data/model';
+import { validateURL } from '@/live2d/data';
 
 export default Vue.extend({
     components: { ModelPicker },
@@ -50,6 +53,11 @@ export default Vue.extend({
 
         urlError: false,
         urlMessages: [] as string[],
+
+        files: [] as File[],
+        inputFiles: [] as File[],
+        fileError: false,
+        fileMessages: [] as string[],
     }),
     watch: {
         url(value) {
@@ -57,6 +65,9 @@ export default Vue.extend({
 
             this.urlError = /error/i.test(message);
             this.urlMessages = [message].filter(Boolean);
+        },
+        inputFiles(value: File[]) {
+            console.log(value);
         },
     },
     methods: {
@@ -76,6 +87,15 @@ export default Vue.extend({
 
             this.$emit('input', false);
             this.$emit('create', id);
+        },
+        fileInputClicked(e: MouseEvent) {
+            const clickingOnIcon = (e.target as HTMLElement).classList.contains('v-icon');
+
+            // don't open file picker when there's already selected files,
+            // as canceling the picker will clear all the selected files
+            if (this.inputFiles.length && !clickingOnIcon) {
+                e.stopPropagation();
+            }
         },
     },
 });
