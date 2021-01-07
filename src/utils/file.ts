@@ -22,6 +22,15 @@ declare global {
     }
 }
 
+/**
+ * Checks if it's files being dragged at this drag event.
+ *
+ * @see https://stackoverflow.com/q/5323668/13237325
+ */
+export function isDraggingFile(event: DragEvent): boolean {
+    return !!event.dataTransfer?.types.some(type => type === 'Files');
+}
+
 export async function readFiles(dataTransferItemList: DataTransferItemList): Promise<File[]> {
     const entries: FileSystemEntry[] = [];
 

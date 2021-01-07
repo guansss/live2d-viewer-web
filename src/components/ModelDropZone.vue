@@ -7,7 +7,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { validateUploadedFiles } from '@/live2d/upload';
-import { readFiles } from '@/utils/file';
+import { isDraggingFile, readFiles } from '@/utils/file';
 
 export default Vue.extend({
     name: "ModelDropZone",
@@ -16,10 +16,10 @@ export default Vue.extend({
         draggingOver: false,
     }),
     created() {
-        document.ondragenter = () => this.draggingOver = true;
-        document.ondragleave = e => this.draggingOver = !!e.relatedTarget;
-        document.ondragover = e => e.preventDefault();
-        document.ondrop = e => this.drop(e);
+        document.ondragenter = e => isDraggingFile(e) && (this.draggingOver = true);
+        document.ondragleave = e => isDraggingFile(e) && (this.draggingOver = !!e.relatedTarget);
+        document.ondragover = e => isDraggingFile(e) && e.preventDefault();
+        document.ondrop = e => isDraggingFile(e) && this.drop(e);
     },
     methods: {
         async drop(e: DragEvent) {
@@ -27,7 +27,7 @@ export default Vue.extend({
 
             this.draggingOver = false;
 
-            if (e.dataTransfer?.items?.length) {
+            if (e.dataTransfer?.items.length) {
                 const files = await readFiles(e.dataTransfer.items);
 
                 try {
