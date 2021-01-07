@@ -62,20 +62,11 @@ declare global {
 
 type Middleware<T> = (context: T, next: (err?: any) => Promise<void>) => Promise<void>
 
-function overrideResolveURL(settings: ModelSettings) {
-    if (!(settings.resolveURL as any).overridden) {
-        const originalResolveURL = settings.resolveURL;
-
-        settings.resolveURL = function(url) {
-            return FileLoader.filesMap[this.url]?.[url] ?? originalResolveURL.call(this, url);
-        };
-
-        (settings.resolveURL as any).overridden = true;
-    }
-}
-
 /**
  * Experimental loader to load resources from uploaded files.
+ *
+ * Though named as a "Loader", this class has nothing to do with `Live2DLoader`,
+ * it only contains a middleware for the `Live2DFactory.`
  */
 export class FileLoader {
     static filesMap: {
@@ -84,11 +75,24 @@ export class FileLoader {
         }
     } = {};
 
+    static resolveURL(settingsURL: string, fileURL: string): string {
+        const resolved = FileLoader.filesMap[settingsURL]?.[fileURL];
+
+        if (resolved === undefined) {
+            throw new Error('Cannot find this file from uploaded files: ' + fileURL);
+        }
+
+        return resolved;
+    }
+
     static factory: Middleware<Live2DFactoryContext> = async (context, next) => {
         if (Array.isArray(context.source) && context.source[0] instanceof File) {
             const settings = await FileLoader.upload(context.source);
 
-            overrideResolveURL(settings);
+            // override the default method to resolve URL from uploaded files
+            settings.resolveURL = function(url) {
+                return FileLoader.resolveURL(this.url, url);
+            };
 
             context.source = settings;
 
@@ -113,15 +117,20 @@ export class FileLoader {
 
     }
 
+    /**
+     * Consumes the files by storing their data URLs, and builds a `ModelSettings` from these files.
+     * @param files
+     */
     static async upload(files: File[]): Promise<ModelSettings> {
         const settings = await FileLoader.createSettings(files);
 
-        const settingsFilePath = (settings as any).localFilePath;
+        const settingsFilePath = (settings as any)._settingsActualPath;
 
         const definedFiles = getFiles(settings);
 
         const fileMap: Record<string, string> = {};
 
+        // only consume the files defined in settings
         for (const definedFile of definedFiles) {
             const actualPath = urlUtils.resolve(settingsFilePath, definedFile);
 
@@ -137,6 +146,9 @@ export class FileLoader {
         return settings;
     }
 
+    /**
+     * Builds a `ModelSettings` from given files. A settings file must be included in the files.
+     */
     static async createSettings(files: File[]): Promise<ModelSettings> {
         const settingsFile = files.find(file => file.name.endsWith('.model.json') ?? file.name.endsWith('.model3.json'));
 
@@ -167,12 +179,12 @@ export class FileLoader {
             throw new Error('Unknown settings JSON');
         }
 
-        const settingsFilePath = settingsFile.webkitRelativePath;
+        const settingsActualPath = settingsFile.webkitRelativePath;
 
         const assertFileExists = (expectedFile: string) => {
-            const path = urlUtils.resolve(settingsFilePath, expectedFile);
+            const actualPath = urlUtils.resolve(settingsActualPath, expectedFile);
 
-            if (!files.find(file => file.webkitRelativePath === path)) {
+            if (!files.find(file => file.webkitRelativePath === actualPath)) {
                 throw new Error(`File "${expectedFile}" is defined in settings, but does not exist in uploaded files`);
             }
         };
@@ -181,7 +193,7 @@ export class FileLoader {
 
         settings.textures.forEach(assertFileExists);
 
-        (settings as any).localFilePath = settingsFilePath;
+        (settings as any)._settingsActualPath = settingsActualPath;
 
         return settings;
     }

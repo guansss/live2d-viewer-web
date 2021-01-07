@@ -111,7 +111,7 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
         fakeLocalPath += '.model.json';
 
         settings = new Cubism2ModelSettings({
-            url: 'blob://' + fakeLocalPath,
+            url: 'DontLoadMe://' + fakeLocalPath,
             textures, pose, physics,
             model: mocFile,
             motions: motions.length
@@ -124,7 +124,7 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
         fakeLocalPath += '.model3.json';
 
         settings = new Cubism4ModelSettings({
-            url: 'blob://' + fakeLocalPath,
+            url: 'DontLoadMe://' + fakeLocalPath,
             Version: 3,
             FileReferences: {
                 Moc: mocFile,
@@ -140,7 +140,7 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
         } as CubismSpec.ModelJSON);
     }
 
-    (settings as any).localFilePath = fakeLocalPath;
+    (settings as any)._settingsActualPath = fakeLocalPath;
 
     return settings;
 }
