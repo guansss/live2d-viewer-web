@@ -10,24 +10,24 @@
       </v-toolbar>
 
       <v-card-text class="pa-8">
-        <v-text-field single-line filled prepend-icon="mdi-link" label="URL" v-model="url" :messages="urlMessages"
+        <v-text-field single-line filled label="URL" v-model="url" :messages="urlMessages"
                       :error="urlError"></v-text-field>
 
-        <div class="d-flex mb-4">
+        <div class="d-flex align-center">
+          <v-btn icon small color="grey" @click="dropHelpDialog=true"><v-icon size="20">mdi-help-circle</v-icon></v-btn>
+          <span>Drag and drop supported</span>
+
           <v-spacer></v-spacer>
-          <v-btn color="blue-grey" @click="picker.dialog=true">
-            From source...
-            <v-icon right>
-              mdi-cloud-search
-            </v-icon>
+
+          <v-btn color="blue-grey" @click="picker.dialog=true">From source...<v-icon right>
+            mdi-cloud-search</v-icon>
           </v-btn>
         </div>
-
-        <v-file-input multiple filled show-size prepend-icon="mdi-file-upload"
-                      placeholder="Not implemented yet, please just drag and drop all the files into this page"
-                      v-model="inputFiles" @click.native.capture="fileInputClicked"></v-file-input>
       </v-card-text>
     </v-card>
+    <v-dialog width="1000" max-width="80vw" v-model="dropHelpDialog">
+      <v-img src="drop.jpg" @click="dropHelpDialog=false"></v-img>
+    </v-dialog>
     <ModelPicker v-model="picker.dialog" @select="url=$event"/>
   </v-dialog>
 </template>
@@ -45,7 +45,9 @@ export default Vue.extend({
         value: Boolean,
     },
     data: () => ({
-        url: '',
+        url: 'https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/Live2D/Senko_Normals/senko.model3.json',
+
+        dropHelpDialog: false,
 
         picker: {
             dialog: false,
@@ -53,11 +55,6 @@ export default Vue.extend({
 
         urlError: false,
         urlMessages: [] as string[],
-
-        files: [] as File[],
-        inputFiles: [] as File[],
-        fileError: false,
-        fileMessages: [] as string[],
     }),
     watch: {
         url(value) {
@@ -65,9 +62,6 @@ export default Vue.extend({
 
             this.urlError = /error/i.test(message);
             this.urlMessages = [message].filter(Boolean);
-        },
-        inputFiles(value: File[]) {
-            console.log(value);
         },
     },
     methods: {
@@ -87,15 +81,6 @@ export default Vue.extend({
 
             this.$emit('input', false);
             this.$emit('create', id);
-        },
-        fileInputClicked(e: MouseEvent) {
-            const clickingOnIcon = (e.target as HTMLElement).classList.contains('v-icon');
-
-            // don't open file picker when there's already selected files,
-            // as canceling the picker will clear all the selected files
-            if (this.inputFiles.length && !clickingOnIcon) {
-                e.stopPropagation();
-            }
         },
     },
 });

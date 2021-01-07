@@ -1,6 +1,6 @@
 <template>
-  <v-dialog :value="value" @input="$emit('input',$event)" width="80vw">
-    <v-card height="80vh" class="d-flex flex-column">
+  <v-dialog :value="value" @input="$emit('input',$event)" width="1500" max-width="90vw">
+    <v-card height="1000" max-height="90vh" class="d-flex flex-column">
       <v-toolbar color="primary" flat dense class="flex-grow-0">
         <v-toolbar-title>Select a Model</v-toolbar-title>
         <v-spacer></v-spacer>
