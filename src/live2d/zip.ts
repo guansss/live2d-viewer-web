@@ -70,6 +70,9 @@ class ZipLoader {
             }
         }
 
+        // FIXME: don't do this
+        requiredFilePaths.push(settingsFile);
+
         return Promise.all(requiredFilePaths.map(
             async path => {
                 const fileName = path.slice(path.lastIndexOf('/') + 1);
