@@ -7,4 +7,6 @@ declare global {
         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
         webkitRelativePath: string;
     }
+
+    function setInterval(handler: TimerHandler, timeout?: number, ...arguments: any[]): number;
 }

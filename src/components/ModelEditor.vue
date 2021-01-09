@@ -36,16 +36,16 @@
           <template v-for="motionGroup in motionGroups">
             <v-subheader :key="motionGroup.name" class="px-3">{{ motionGroup.name || '(Nameless)' }}</v-subheader>
             <v-list-item ripple v-for="(motion,i) in motionGroup.motions" :key="motionGroup.name+i"
+                         :set="active=motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i"
                          @click="startMotion(motionGroup,i)">
+              <div v-if="active" class="motion-progress" :style="motionProgressStyle"></div>
               <v-list-item-content>
-                <v-list-item-title
-                    :class="{'primary--text':motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i}">
+                <v-list-item-title :class="{'primary--text':active}">
                   {{ motion.file }}
                 </v-list-item-title>
               </v-list-item-content>
               <v-list-item-icon class="my-0 align-self-center">
-                <v-icon size="32" color="primary"
-                        v-if="motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i">mdi-play</v-icon>
+                <v-icon size="32" color="primary" v-if="active">mdi-play</v-icon>
                 <v-progress-circular indeterminate size="20" v-else-if="(motionState.reservedGroup===motionGroup.name&&motionState.reservedIndex===i)
                     ||(motionState.reservedIdleGroup===motionGroup.name&&motionState.reservedIdleIndex===i)"></v-progress-circular>
               </v-list-item-icon>
@@ -62,6 +62,7 @@ import Vue from 'vue';
 import { ModelEntity } from '@/live2d/ModelEntity';
 import { Live2DModel } from '@/live2d/Live2DModel';
 import { MotionPriority, MotionState } from 'pixi-live2d-display';
+import clamp from 'lodash/clamp';
 
 interface MotionGroup {
     name: string
@@ -87,7 +88,10 @@ export default Vue.extend({
         motionGroups: [] as MotionGroup[],
         motionState: null as MotionState | null | undefined,
 
-        activeMotionIndex: -1,
+        motionProgressUpdateID: -1,
+        motionProgressStyle: {
+            transform: `translateX(-100%)`,
+        },
     }),
     computed: {
         rotationDeg() {
@@ -107,6 +111,12 @@ export default Vue.extend({
         rotation(rotation: number) {
             this.model!.rotate(rotation);
         },
+
+        // immediately update progress when current motion has changed
+        'motionState.currentGroup': 'updateMotionProgress',
+    },
+    created() {
+        this.motionProgressUpdateID = setInterval(this.updateMotionProgress.bind(this), 50);
     },
     methods: {
         updateModel() {
@@ -151,6 +161,21 @@ export default Vue.extend({
         startMotion(motionGroup: MotionGroup, index: number) {
             this.model!.pixiModel!.motion(motionGroup.name, index, MotionPriority.FORCE);
         },
+        updateMotionProgress() {
+            if (!this.model?.pixiModel) {
+                return;
+            }
+
+            const startTime = this.model.pixiModel.currentMotionStartTime;
+            const duration = this.model.pixiModel.currentMotionDuration;
+            const progress = clamp((this.model.pixiModel.elapsedTime - startTime) / duration, 0, 1);
+
+            this.motionProgressStyle.transform = `translateX(${(progress - 1) * 100}%)`;
+        },
+    },
+    beforeDestroy() {
+        this.resetModel();
+        clearInterval(this.motionProgressUpdateID);
     },
 });
 </script>
@@ -158,4 +183,15 @@ export default Vue.extend({
 <style scoped lang="stylus">
 >>> .v-list-item
   padding 0 12px !important
+
+.motion-progress
+  position absolute
+  z-index -1
+  top 0
+  bottom 0
+  left 0
+  right 0
+  opacity .24
+  background var(--v-primary-base)
+  transform translateX(-100%)
 </style>

@@ -2,16 +2,20 @@ import { Live2DModel as _Live2DModel } from 'pixi-live2d-display';
 import { HitAreaFrames } from 'pixi-live2d-display/src/tools/HitAreaFrames';
 
 export class Live2DModel extends _Live2DModel {
-    hitAreaFrames!: HitAreaFrames;
+    hitAreaFrames: HitAreaFrames;
+
+    currentMotionStartTime = performance.now();
+    currentMotionDuration = 0;
 
     constructor() {
         super();
+
+        this.hitAreaFrames = new HitAreaFrames();
 
         this.once('modelLoaded', this._init);
     }
 
     _init() {
-        this.hitAreaFrames = new HitAreaFrames();
         this.addChild(this.hitAreaFrames);
 
         this.anchor.set(0.5, 0.5);
@@ -24,6 +28,21 @@ export class Live2DModel extends _Live2DModel {
                 this.emit('motion:' + eventValue);
             },
         );
+
+        this.internalModel.motionManager.on('motionStart', (group: string, index: number) => {
+            this.currentMotionStartTime = this.elapsedTime;
+            this.currentMotionDuration = 0;
+
+            const motion = this.internalModel.motionManager.motionGroups[group]?.[index];
+
+            if (motion) {
+                if ('_loopDurationSeconds' in motion) {
+                    this.currentMotionDuration = motion._loopDurationSeconds * 1000;
+                } else if ('getDurationMSec' in motion) {
+                    this.currentMotionDuration = motion.getDurationMSec();
+                }
+            }
+        });
     }
 
     startHitMotion(hitAreaNames: string[]) {

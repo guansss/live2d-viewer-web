@@ -82,7 +82,6 @@ export default Vue.extend({
 
         models: [] as ModelEntity[],
     }),
-    computed: {},
 
     methods: {
         showUI(show: boolean) {
