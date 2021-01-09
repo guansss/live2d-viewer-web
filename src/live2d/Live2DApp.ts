@@ -6,7 +6,6 @@ import { Ticker, TickerPlugin } from '@pixi/ticker';
 import { InteractionManager } from '@pixi/interaction';
 import { config, ExtendedFileList } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
-import { settings } from '@pixi/settings';
 import './patches';
 import './zip';
 
@@ -34,7 +33,7 @@ export class Live2DApp {
     }
 
     addModel(source: string | ExtendedFileList): number {
-        const model = new ModelEntity(source);
+        const model = new ModelEntity(source, this.pixiApp.renderer);
 
         this.initModel(model);
         this.models.push(model);
@@ -47,36 +46,14 @@ export class Live2DApp {
     }
 
     private initModel(model: ModelEntity) {
-        model.on('modelLoaded', (pixiModel: Live2DModel) => {
+        model.on('modelLoaded', async (pixiModel: Live2DModel) => {
             if (!this.pixiApp.stage.children.includes(pixiModel)) {
                 this.pixiApp.stage.addChild(pixiModel);
 
                 pixiModel.position.set(this.pixiApp.renderer.width / 2, this.pixiApp.renderer.height / 2);
                 model.fit(this.pixiApp.renderer.width, this.pixiApp.renderer.height);
-
-                try {
-                    model.thumbnail = this.createThumbnail(pixiModel);
-                } catch (e) {
-                    model.error = e.message;
-                }
             }
         });
-    }
-
-    createThumbnail(pixiModel: Live2DModel): string {
-        let dataURL: string | undefined;
-
-        settings.RESOLUTION = 0.2;
-        pixiModel.hitAreaFrames.visible = false;
-
-        try {
-            dataURL = this.pixiApp.renderer.extract.base64(pixiModel, 'image/webp', 0.01);
-        } finally {
-            settings.RESOLUTION = 1;
-            pixiModel.hitAreaFrames.visible = true;
-        }
-
-        return dataURL;
     }
 
     removeModel(id: number) {

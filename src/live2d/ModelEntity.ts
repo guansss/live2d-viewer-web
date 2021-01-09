@@ -1,6 +1,8 @@
 import { Live2DModel } from '@/live2d/Live2DModel';
 import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools';
+import { settings } from '@pixi/settings';
+import { Renderer } from '@pixi/core';
 
 // 1x1 green image
 const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
@@ -26,8 +28,12 @@ export class ModelEntity extends EventEmitter {
 
     pixiModel?: Live2DModel;
 
-    constructor(source: string | File[]) {
+    renderer: Renderer;
+
+    constructor(source: string | File[], renderer: Renderer) {
         super();
+
+        this.renderer = renderer;
 
         this.loadModel(source).then();
     }
@@ -48,6 +54,7 @@ export class ModelEntity extends EventEmitter {
         if (this.pixiModel) {
             this.initModel(this.pixiModel);
             this.emit('modelLoaded', this.pixiModel);
+            this.initThumbnail(this.pixiModel);
         }
     }
 
@@ -58,6 +65,22 @@ export class ModelEntity extends EventEmitter {
         this.aspectRatio = pixiModel.width / pixiModel.height;
 
         draggable(pixiModel);
+    }
+
+    initThumbnail(pixiModel: Live2DModel) {
+        settings.RESOLUTION = 0.2;
+        pixiModel.hitAreaFrames.visible = false;
+
+        try {
+            const canvas = this.renderer.extract.canvas(pixiModel);
+
+            canvas.toBlob(blob => this.thumbnail = URL.createObjectURL(blob), 'image/webp', 0.01);
+        } catch (e) {
+            console.warn(e);
+        }
+
+        settings.RESOLUTION = 1;
+        pixiModel.hitAreaFrames.visible = true;
     }
 
     fit(width: number, height: number) {
@@ -107,6 +130,8 @@ export class ModelEntity extends EventEmitter {
         if (this.pixiModel) {
             this.pixiModel.destroy({ children: true });
             this.pixiModel = undefined;
+
+            URL.revokeObjectURL(this.thumbnail);
         }
     }
 
