@@ -6,8 +6,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { validateUploadedFiles } from '@/live2d/upload';
+import { uploadedFiles } from '@/live2d/upload';
 import { isDraggingFile, readFiles } from '@/utils/file';
+import { ExtendedFileList } from 'pixi-live2d-display';
 
 export default Vue.extend({
     name: "ModelDropZone",
@@ -30,15 +31,28 @@ export default Vue.extend({
             if (e.dataTransfer?.items.length) {
                 const files = await readFiles(e.dataTransfer.items);
 
-                try {
-                    const validFiles = await validateUploadedFiles(files);
+                this.upload(files);
+            }
+        },
+        async upload(files: File[]) {
+            try {
+                const settingsArray = await uploadedFiles(files);
 
-                    this.$emit('upload', validFiles);
-                } catch (e) {
-                    e.message = 'Failed to load model: ' + e.message;
+                if (settingsArray.length) {
+                    for (const settings of settingsArray) {
+                        const fileList = files as ExtendedFileList;
 
-                    this.$emit('error', e);
+                        fileList.settings = settings;
+
+                        this.$live2dApp.addModel(fileList);
+                    }
+                } else {
+                    this.$live2dApp.addModel(files);
                 }
+            } catch (e) {
+                e.message = 'Failed to load model: ' + e.message;
+
+                this.$emit('error', e);
             }
         },
     },

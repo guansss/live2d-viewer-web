@@ -4,12 +4,11 @@ import { Live2DModel } from '@/live2d/Live2DModel';
 import { BatchRenderer, Renderer } from '@pixi/core';
 import { Ticker, TickerPlugin } from '@pixi/ticker';
 import { InteractionManager } from '@pixi/interaction';
-import { config } from 'pixi-live2d-display';
+import { config, ExtendedFileList } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import { settings } from '@pixi/settings';
 import './patches';
 import './zip';
-import { splitFilesBySettingsFile } from '@/live2d/upload';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -34,23 +33,7 @@ export class Live2DApp {
         this.pixiApp.stage.interactive = true;
     }
 
-    addModel(url: string): number {
-        return this.createModel(url);
-    }
-
-    addModels(files: File[]): void {
-        if (files.length === 1 && files[0].name.endsWith('.zip')) {
-            this.createModel(files);
-        } else {
-            const fileGroups = splitFilesBySettingsFile(files);
-
-            for (const fileGroup of fileGroups) {
-                this.createModel(fileGroup);
-            }
-        }
-    }
-
-    createModel(source: string | File[]): number {
+    addModel(source: string | ExtendedFileList): number {
         const model = new ModelEntity(source);
 
         this.initModel(model);

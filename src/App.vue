@@ -33,7 +33,7 @@
       </v-btn>
     </v-fab-transition>
 
-    <ModelDropZone @upload="upload" @error="error"/>
+    <ModelDropZone @error="error"/>
 
     <v-snackbar v-model="snackbar.visible" timeout="-1">
       {{ snackbar.message }}
@@ -89,9 +89,6 @@ export default Vue.extend({
             this.drawer = show;
             this.modelList.visible = show;
             this.drawerSwitch = false;
-        },
-        upload(files: File[]) {
-            this.$live2dApp.addModels(files);
         },
         error(e: any) {
             const message = e && e.message || e + '';

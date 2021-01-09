@@ -1,12 +1,5 @@
-import {
-    Cubism2ModelSettings,
-    Cubism2Spec,
-    Cubism4ModelSettings,
-    CubismSpec,
-    ModelSettings,
-} from 'pixi-live2d-display';
+import { Cubism2ModelSettings, Cubism4ModelSettings, FileLoader, ModelSettings } from 'pixi-live2d-display';
 import { isMocFile, isMocFileV2, isSettingsFile } from '@/live2d/helpers';
-import { FileLoader } from '@/live2d/FileLoader';
 
 const MAX_SETTINGS_FILES = 5;
 
@@ -14,58 +7,28 @@ let uid = 0;
 
 const defaultCreateSettings = FileLoader.createSettings;
 
-FileLoader.createSettings = async (files) => {
+FileLoader.createSettings = async (files: File[]) => {
     if (!files.find(file => isSettingsFile(file.name))) {
-        return createSettingsFromFiles(files);
+        return createFakeSettings(files);
     }
 
     return defaultCreateSettings(files);
 };
 
-export async function validateUploadedFiles(files: File[]): Promise<File[]> {
-    const fileGroups = splitFilesBySettingsFile(files);
-
-    if (fileGroups.length) {
-        const filesSet = new Set<File>();
-
-        let error: Error | undefined;
-
-        await Promise.allSettled(fileGroups.map(
-            async fileGroup => {
-                try {
-                    // will throw an error if it fails
-                    await FileLoader.createSettings(fileGroup);
-
-                    // append the valid settings file, along with all the non-settings files
-                    fileGroup.forEach(file => filesSet.add(file));
-                } catch (e) {
-                    // just care about the first error
-                    error = error || e;
-                }
-            },
-        ));
-
-        // it's OK when there's at least one valid settings file
-        if (!filesSet.size) {
-            // here the error will always be defined, but, just in case
-            error = error || new Error('Unknown error');
-
-            throw error;
-        }
-
-        return [...filesSet];
-    } else if (files.length === 1 && files[0].name.endsWith('.zip')) {
+export async function uploadedFiles(files: File[]): Promise<ModelSettings[]> {
+    if (files.length === 1 && files[0].name.endsWith('.zip')) {
         // just let it go...
-        return files;
-    } else {
-        // will throw an error if it fails
-        createSettingsFromFiles(files);
+        return [];
+    }
 
-        return files;
+    if (files.some(file => isSettingsFile(file.name))) {
+        return createSettings(files);
+    } else {
+        return [createFakeSettings(files)];
     }
 }
 
-export function splitFilesBySettingsFile(files: File[]): File[][] {
+export async function createSettings(files: File[]): Promise<ModelSettings[]> {
     const settingsFiles: File[] = [];
     const nonSettingsFiles: File[] = [];
 
@@ -78,13 +41,43 @@ export function splitFilesBySettingsFile(files: File[]): File[][] {
     }
 
     if (settingsFiles.length > MAX_SETTINGS_FILES) {
-        throw new Error(`Too many settings files ${settingsFiles.length}/${MAX_SETTINGS_FILES}`);
+        console.warn(`Too many settings files (${settingsFiles.length}/${MAX_SETTINGS_FILES})`);
+
+        settingsFiles.length = MAX_SETTINGS_FILES;
     }
 
-    return settingsFiles.map(settingsFile => [settingsFile, ...nonSettingsFiles]);
+    let error: Error | undefined;
+
+    const settingsArray: ModelSettings[] = [];
+
+    await Promise.all(settingsFiles.map(
+        async settingsFile => {
+            try {
+                const partialFiles = [settingsFile, ...nonSettingsFiles];
+
+                const settings = await FileLoader.createSettings(partialFiles);
+
+                settings.validateFiles(partialFiles.map(file => file.webkitRelativePath));
+
+                settingsArray.push(settings);
+            } catch (e) {
+                // just care about the first error
+                error = error || e;
+
+                console.warn(e);
+            }
+        },
+    ));
+
+    // it's OK when there's at least one valid settings file
+    if (!settingsArray.length) {
+        throw error;
+    }
+
+    return settingsArray;
 }
 
-function createSettingsFromFiles(files: File[]): ModelSettings {
+function createFakeSettings(files: File[]): ModelSettings {
     const mocFiles = files.filter(file => isMocFile(file.name));
 
     if (mocFiles.length !== 1) {
@@ -107,14 +100,14 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
     const physics = filePaths.find(f => f.includes('physics'));
     const pose = filePaths.find(f => f.includes('pose'));
 
-    let fakeLocalPath = 'dummy' + (uid++);
+    let fakeSettingsFile = 'dummy' + (uid++);
     let settings: ModelSettings;
 
     if (isMocFileV2(mocFile)) {
-        fakeLocalPath += '.model.json';
+        fakeSettingsFile += '.model.json';
 
         settings = new Cubism2ModelSettings({
-            url: 'DontLoadMe://' + fakeLocalPath,
+            url: fakeSettingsFile,
             textures, pose, physics,
             model: mocFile,
             motions: motions.length
@@ -122,12 +115,12 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
                     '': motions.map(motion => ({ file: motion })),
                 }
                 : undefined,
-        } as Cubism2Spec.ModelJSON);
+        });
     } else {
-        fakeLocalPath += '.model3.json';
+        fakeSettingsFile += '.model3.json';
 
         settings = new Cubism4ModelSettings({
-            url: 'DontLoadMe://' + fakeLocalPath,
+            url: fakeSettingsFile,
             Version: 3,
             FileReferences: {
                 Moc: mocFile,
@@ -140,10 +133,10 @@ function createSettingsFromFiles(files: File[]): ModelSettings {
                     }
                     : undefined,
             },
-        } as CubismSpec.ModelJSON);
+        });
     }
 
-    (settings as any)._settingsActualPath = fakeLocalPath;
+    (settings as any)._objectURL = 'DontTouchMe://' + fakeSettingsFile;
 
     return settings;
 }
