@@ -23,7 +23,15 @@
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </div>
-          <div class="mt-2 text-h5">{{ selectedModelID ? modelName : 'Press + to create a model' }}</div>
+          <v-tooltip top :disabled="!selectedModelID">
+            <template v-slot:activator="{ on, attrs }">
+              <div :class="['model-name mt-2 text-h5',{valid:selectedModelID}]"
+                   @click="selectedModelID&&(modelInfoDialog=true)" v-bind="attrs" v-on="on">
+                {{ selectedModelID ? modelName : 'Press + to create a model' }}
+              </div>
+            </template>
+            Show info
+          </v-tooltip>
         </div>
 
         <v-divider></v-divider>
@@ -39,6 +47,7 @@
         <ModelList v-model="selectedModelID" :show="modelList.visible"/>
       </v-container>
       <ModelCreation v-model="creation.dialog" @create="selectedModelID=$event"/>
+      <ModelInfo v-model="modelInfoDialog" :id="selectedModelID"/>
     </v-main>
 
     <v-fab-transition>
@@ -65,10 +74,11 @@ import ModelCreation from './components/ModelCreation.vue';
 import ModelEditor from '@/components/ModelEditor.vue';
 import ModelDropZone from '@/components/ModelDropZone.vue';
 import Settings from '@/components/Settings.vue';
+import ModelInfo from '@/components/ModelInfo.vue';
 
 export default Vue.extend({
     name: 'App',
-    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone, Settings },
+    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone, ModelInfo, Settings },
     data: () => ({
         drawer: true,
         drawerSwitch: false,
@@ -81,6 +91,8 @@ export default Vue.extend({
         },
 
         selectedModelID: 0,
+
+        modelInfoDialog: false,
 
         creation: {
             dialog: false,
@@ -145,6 +157,12 @@ export default Vue.extend({
   display flex
   flex-direction column
   overflow auto
+
+.model-name.valid
+  cursor pointer
+
+  &:hover
+    color var(--v-primary-base)
 
 .model-editor
   overflow auto
