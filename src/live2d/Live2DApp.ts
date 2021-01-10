@@ -40,7 +40,7 @@ export class Live2DApp {
             view: canvas,
             resizeTo: window,
             antialias: true,
-            backgroundColor: 0x111111,
+            transparent: true,
             autoStart: false,
         });
         this.pixiApp.stage.interactive = true;

@@ -80,3 +80,12 @@ async function readFileEntry(fileEntry: FileSystemFileEntry): Promise<File> {
 
     return file;
 }
+
+export function readAsBase64(file: File): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}

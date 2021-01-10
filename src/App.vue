@@ -56,9 +56,9 @@
       </v-btn>
     </v-fab-transition>
 
-    <ModelDropZone @error="error"/>
+    <DropZone @error="error"/>
 
-    <v-snackbar v-model="snackbar.visible" timeout="-1">
+    <v-snackbar v-model="snackbar.visible" :timeout="snackbar.timeout">
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn icon v-bind="attrs" @click="snackbar.visible=false"><v-icon>mdi-close</v-icon></v-btn>
@@ -72,13 +72,14 @@ import Vue from 'vue';
 import ModelList from './components/ModelList.vue';
 import ModelCreation from './components/ModelCreation.vue';
 import ModelEditor from '@/components/ModelEditor.vue';
-import ModelDropZone from '@/components/ModelDropZone.vue';
+import DropZone from '@/components/DropZone.vue';
 import Settings from '@/components/Settings.vue';
 import ModelInfo from '@/components/ModelInfo.vue';
+import { Background } from '@/tools/background';
 
 export default Vue.extend({
     name: 'App',
-    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone, ModelInfo, Settings },
+    components: { ModelList, ModelCreation, ModelEditor, DropZone, ModelInfo, Settings },
     data: () => ({
         drawer: true,
         drawerSwitch: false,
@@ -102,6 +103,7 @@ export default Vue.extend({
         snackbar: {
             visible: false,
             message: '',
+            timeout: 5000,
         },
     }),
     computed: {
@@ -118,12 +120,16 @@ export default Vue.extend({
             this.modelList.visible = show;
             this.drawerSwitch = false;
         },
+        snack(message: string, timeout: number = 5000) {
+            this.snackbar.message = message;
+            this.snackbar.timeout = timeout;
+            this.snackbar.visible = true;
+        },
         error(e: any) {
             const message = e && e.message || e + '';
 
             if (message) {
-                this.snackbar.message = message;
-                this.snackbar.visible = true;
+                this.snack(message, -1);
             }
         },
         log(...args: any[]) {
@@ -134,6 +140,10 @@ export default Vue.extend({
         // switch to the default tab
         this.tab = undefined;
         this.creation.dialog = true;
+
+        if (!Background.current) {
+            this.snack('Drag and drop an image to set the background!');
+        }
     },
 });
 </script>
@@ -160,6 +170,7 @@ export default Vue.extend({
 
 .model-name.valid
   cursor pointer
+  transition color .1s ease-out
 
   &:hover
     color var(--v-primary-base)
@@ -182,6 +193,9 @@ html
 
 #app
   pointer-events none
+
+.v-application
+  background none !important
 
 .v-btn--fab.v-size--default.v-btn--absolute.v-btn--top
   top: 16px

@@ -7,6 +7,16 @@
       <v-switch class="v-input--reverse" v-model="hitAreaFrames" label="Show hit area frames"></v-switch>
       <v-switch class="v-input--reverse" v-model="modelFrame" label="Show model frames"></v-switch>
       <v-switch class="v-input--reverse" v-model="stats" label="Show stats"></v-switch>
+
+      <template v-if="currentBackground">
+        <v-divider></v-divider>
+        <v-subheader class="px-0">Background</v-subheader>
+        <div class="mt-2 d-flex align-center">
+          <span>{{ currentBackground }}</span>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" @click="resetBackground">Reset</v-btn>
+        </div>
+      </template>
     </div>
 
     <v-spacer></v-spacer>
@@ -22,6 +32,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { Background } from '@/tools/background';
 
 export default Vue.extend({
     name: "Settings",
@@ -31,6 +42,7 @@ export default Vue.extend({
         modelFrame: false,
         stats: false,
         lastUpdated: new Date(__BUILD_TIME__).toLocaleString(),
+        currentBackground: Background.current,
     }),
     watch: {
         stats(value: boolean) {
@@ -51,6 +63,19 @@ export default Vue.extend({
         this.volume = this.$live2dApp.volume;
         this.hitAreaFrames = this.$live2dApp.showHitAreaFrames;
         this.modelFrame = this.$live2dApp.showModelFrame;
+
+        Background.emitter.on('change', this.backgroundChanged, this);
+    },
+    methods: {
+        resetBackground() {
+            Background.reset();
+        },
+        backgroundChanged(background: string) {
+            this.currentBackground = background;
+        },
+    },
+    beforeDestroy() {
+        Background.emitter.off('change', this.backgroundChanged);
     },
 });
 </script>

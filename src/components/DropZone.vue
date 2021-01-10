@@ -9,9 +9,10 @@ import Vue from 'vue';
 import { uploadedFiles } from '@/live2d/upload';
 import { isDraggingFile, readFiles } from '@/utils/file';
 import { ExtendedFileList } from 'pixi-live2d-display';
+import { Background } from '@/tools/background';
 
 export default Vue.extend({
-    name: "ModelDropZone",
+    name: "DropZone",
 
     data: () => ({
         draggingOver: false,
@@ -31,10 +32,14 @@ export default Vue.extend({
             if (e.dataTransfer?.items.length) {
                 const files = await readFiles(e.dataTransfer.items);
 
-                this.upload(files);
+                if (files.length === 1 && files[0].type.includes('image')) {
+                    Background.set(files[0]).catch(console.warn);
+                } else {
+                    this.uploadModel(files).then();
+                }
             }
         },
-        async upload(files: File[]) {
+        async uploadModel(files: File[]) {
             try {
                 const settingsArray = await uploadedFiles(files);
 
