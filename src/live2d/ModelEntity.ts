@@ -1,6 +1,6 @@
 import { Live2DModel } from '@/live2d/Live2DModel';
 import { EventEmitter } from '@pixi/utils';
-import { draggable } from '@/tools';
+import { draggable } from '@/tools/dragging';
 import { settings } from '@pixi/settings';
 import { Renderer } from '@pixi/core';
 
@@ -48,6 +48,8 @@ export class ModelEntity extends EventEmitter {
         try {
             this.pixiModel = await Live2DModel.from(source);
         } catch (e) {
+            console.warn(e);
+
             this.error = e instanceof Error ? e.message : e + '';
         }
 
@@ -69,7 +71,11 @@ export class ModelEntity extends EventEmitter {
 
     initThumbnail(pixiModel: Live2DModel) {
         settings.RESOLUTION = 0.2;
+
+        const hitAreaFramesVisible = pixiModel.hitAreaFrames.visible;
+        const backgroundVisible = pixiModel.backgroundVisible;
         pixiModel.hitAreaFrames.visible = false;
+        pixiModel.backgroundVisible = false;
 
         try {
             const canvas = this.renderer.extract.canvas(pixiModel);
@@ -80,7 +86,8 @@ export class ModelEntity extends EventEmitter {
         }
 
         settings.RESOLUTION = 1;
-        pixiModel.hitAreaFrames.visible = true;
+        pixiModel.hitAreaFrames.visible = hitAreaFramesVisible;
+        pixiModel.backgroundVisible = backgroundVisible;
     }
 
     fit(width: number, height: number) {

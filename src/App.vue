@@ -4,20 +4,34 @@
       <v-toolbar color="primary">
         <v-toolbar-title>Live2D Viewer</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn icon href="https://github.com/guansss/live2d-viewer-web">
-          <v-icon>mdi-github</v-icon>
-        </v-btn>
-        <v-btn icon @click="creation.dialog=true">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-        <v-btn icon @click="showUI(false)">
+        <v-btn-toggle group rounded v-model="tab">
+          <v-btn icon>
+            <v-icon>mdi-cog</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+        <v-btn icon class="ml-1" @click="showUI(false)">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
 
-      <v-divider></v-divider>
+      <div v-show="tab===undefined" class="model-page">
+        <div class="header pa-3">
+          <div class="d-flex align-center">
+            <div class="text-h4">{{ '#' + selectedModelID }}</div>
+            <v-spacer></v-spacer>
+            <v-btn icon width="48" height="48" class="mr-n3" @click="creation.dialog=true">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </div>
+          <div class="mt-2 text-h5">{{ selectedModelID ? modelName : 'Press + to create a model' }}</div>
+        </div>
 
-      <ModelEditor :id="selectedModelID"/>
+        <v-divider></v-divider>
+
+        <ModelEditor v-if="tab===undefined" :id="selectedModelID"/>
+      </div>
+
+      <Settings v-show="tab===0"/>
     </v-navigation-drawer>
     <v-main>
       <v-container fluid class="pa-0 fill-height flex-column">
@@ -48,41 +62,41 @@
 import Vue from 'vue';
 import ModelList from './components/ModelList.vue';
 import ModelCreation from './components/ModelCreation.vue';
-import { ModelEntity } from '@/live2d/ModelEntity';
 import ModelEditor from '@/components/ModelEditor.vue';
 import ModelDropZone from '@/components/ModelDropZone.vue';
+import Settings from '@/components/Settings.vue';
 
 export default Vue.extend({
     name: 'App',
-
-    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone },
-
+    components: { ModelList, ModelCreation, ModelEditor, ModelDropZone, Settings },
     data: () => ({
         drawer: true,
         drawerSwitch: false,
         loading: false,
 
+        tab: -1 as number | undefined,
+
         modelList: {
             visible: true,
         },
 
-        selectedModelID: -1,
+        selectedModelID: 0,
 
         creation: {
             dialog: false,
             result: null,
         },
 
-        drop: {},
-
         snackbar: {
             visible: false,
             message: '',
         },
-
-        models: [] as ModelEntity[],
     }),
-
+    computed: {
+        modelName() {
+            return this.$live2dApp.getModel(this.selectedModelID)?.name || '';
+        },
+    },
     methods: {
         showUI(show: boolean) {
             this.drawer = show;
@@ -102,7 +116,8 @@ export default Vue.extend({
         },
     },
     created() {
-        this.models = this.$live2dApp.models;
+        // switch to the default tab
+        this.tab = undefined;
         this.creation.dialog = true;
     },
 });
@@ -118,6 +133,18 @@ export default Vue.extend({
 
   .v-toolbar
     flex-grow initial !important
+
+>>> .v-toolbar__content
+  padding-left 12px
+  padding-right 12px
+
+.v-btn-toggle > .v-btn.v-btn
+  opacity 1
+
+.model-page
+  display flex
+  flex-direction column
+  overflow auto
 
 .model-editor
   overflow auto
@@ -141,4 +168,18 @@ html
 .v-btn--fab.v-size--default.v-btn--absolute.v-btn--top
   top: 16px
   pointer-events auto
+
+// https://github.com/vuetifyjs/vuetify/issues/7283#issuecomment-572276385
+// Reversed input variant
+.v-input--reverse .v-input__slot
+  flex-direction: row-reverse
+  justify-content: flex-end
+
+  .v-input--selection-controls__input
+    margin-right: 0
+    margin-left: 8px
+
+  .v-label
+    display: block
+    flex: 1
 </style>

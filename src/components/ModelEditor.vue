@@ -1,10 +1,5 @@
 <template>
   <div class="model-editor" v-if="model">
-    <div class="pa-2 d-flex align-center">
-      <div class="text-h4">{{ '#' + model.id }}</div>
-    </div>
-    <div class="pa-2 text-h5">{{ model.name }}</div>
-
     <v-list expand>
       <v-list-group :value="true">
         <template v-slot:activator>
@@ -25,7 +20,7 @@
         </v-list-item>
       </v-list-group>
 
-      <v-list-group>
+      <v-list-group :value="true">
         <template v-slot:activator>
           <v-list-item-content>
             <v-list-item-title>Motions</v-list-item-title>
@@ -39,9 +34,9 @@
                          :set="active=motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i"
                          @click="startMotion(motionGroup,i)">
               <div v-if="active" class="motion-progress" :style="motionProgressStyle"></div>
-              <v-list-item-content>
+              <v-list-item-content :title="motion.file">
                 <v-list-item-title :class="{'primary--text':active}">
-                  {{ motion.file }}
+                  {{ motion.file.replace('.mtn', '').replace('.motion3.json', '') }}
                 </v-list-item-title>
               </v-list-item-content>
               <v-list-item-icon class="my-0 align-self-center">
@@ -150,7 +145,7 @@ export default Vue.extend({
                 motionGroups.push({
                     name: group,
                     motions: motions?.map(motion => ({
-                        file: motion.file || motion.File,
+                        file: motion.file || motion.File || '',
                     })) || [],
                 });
             }

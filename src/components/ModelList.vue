@@ -61,7 +61,7 @@ export default Vue.extend({
     },
     methods: {
         select(index: number) {
-            const id = this.models[index]?.id ?? -1;
+            const id = this.models[index]?.id ?? 0;
 
             this.$emit('input', id);
         },
@@ -69,7 +69,7 @@ export default Vue.extend({
             this.$live2dApp.removeModel(id);
 
             if (this.models.length === 0) {
-                this.$emit('input', -1);
+                this.$emit('input', 0);
             }
         },
     },

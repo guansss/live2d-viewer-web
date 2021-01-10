@@ -20,6 +20,10 @@ declare module '@pixi/display' {
     export { DisplayObject, Container } from 'pixi.js';
 }
 
+declare module '@pixi/sprite' {
+    export { Sprite } from 'pixi.js';
+}
+
 declare module '@pixi/graphics' {
     export { Graphics } from 'pixi.js';
 }

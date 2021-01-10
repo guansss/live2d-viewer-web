@@ -1,8 +1,13 @@
 import { Live2DModel as _Live2DModel } from 'pixi-live2d-display';
 import { HitAreaFrames } from 'pixi-live2d-display/src/tools/HitAreaFrames';
+import { Sprite } from '@pixi/sprite';
+import { Texture } from '@pixi/core';
 
 export class Live2DModel extends _Live2DModel {
     hitAreaFrames: HitAreaFrames;
+    background: Sprite;
+
+    backgroundVisible = false;
 
     currentMotionStartTime = performance.now();
     currentMotionDuration = 0;
@@ -11,12 +16,21 @@ export class Live2DModel extends _Live2DModel {
         super();
 
         this.hitAreaFrames = new HitAreaFrames();
+        this.hitAreaFrames.visible = false;
+
+        this.background = Sprite.from(Texture.WHITE);
+        this.background.alpha = 0.2;
+        this.background.visible = false;
 
         this.once('modelLoaded', this._init);
     }
 
     _init() {
         this.addChild(this.hitAreaFrames);
+        this.addChild(this.background);
+
+        this.background.width = this.internalModel.width;
+        this.background.height = this.internalModel.height;
 
         this.anchor.set(0.5, 0.5);
 
@@ -65,5 +79,27 @@ export class Live2DModel extends _Live2DModel {
                 }
             }
         }
+    }
+
+    updateTransform() {
+        super.updateTransform();
+
+        // since the background's `visible` is always false, we need to manually update its transform
+        if (this.backgroundVisible) {
+            this.background.updateTransform();
+        }
+    }
+
+    protected _render(renderer: PIXI.Renderer) {
+        // render background before the model
+        if (this.backgroundVisible) {
+            this.background.visible = true;
+
+            this.background.render(renderer);
+
+            this.background.visible = false;
+        }
+
+        super._render(renderer);
     }
 }

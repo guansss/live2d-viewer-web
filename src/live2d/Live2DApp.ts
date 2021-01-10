@@ -4,10 +4,11 @@ import { Live2DModel } from '@/live2d/Live2DModel';
 import { BatchRenderer, Renderer } from '@pixi/core';
 import { Ticker, TickerPlugin } from '@pixi/ticker';
 import { InteractionManager } from '@pixi/interaction';
-import { config, ExtendedFileList } from 'pixi-live2d-display';
+import { config, ExtendedFileList, SoundManager } from 'pixi-live2d-display';
 import { Extract } from '@pixi/extract';
 import './patches';
 import './zip';
+import { load, save } from '@/tools/storage';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -23,6 +24,10 @@ export class Live2DApp {
 
     pixiApp: Application;
 
+    private _volume = load('volume', 0.5);
+    private _showHitAreaFrames = load('hitAreaFrames', true);
+    private _showModelFrame = load('modelFrame', false);
+
     constructor(canvas: HTMLCanvasElement) {
         this.pixiApp = new Application({
             view: canvas,
@@ -30,6 +35,8 @@ export class Live2DApp {
             antialias: true,
         });
         this.pixiApp.stage.interactive = true;
+
+        SoundManager.volume = this.volume;
     }
 
     addModel(source: string | ExtendedFileList): number {
@@ -50,7 +57,10 @@ export class Live2DApp {
             if (!this.pixiApp.stage.children.includes(pixiModel)) {
                 this.pixiApp.stage.addChild(pixiModel);
 
+                pixiModel.backgroundVisible = this.showModelFrame;
+                pixiModel.hitAreaFrames.visible = this.showHitAreaFrames;
                 pixiModel.position.set(this.pixiApp.renderer.width / 2, this.pixiApp.renderer.height / 2);
+
                 model.fit(this.pixiApp.renderer.width, this.pixiApp.renderer.height);
             }
         });
@@ -68,5 +78,47 @@ export class Live2DApp {
 
             model.destroy();
         }
+    }
+
+    get volume(): number {
+        return this._volume;
+    }
+
+    set volume(value: number) {
+        this._volume = value;
+        SoundManager.volume = value;
+        save('volume', value);
+    }
+
+    set showModelFrame(value: boolean) {
+        this._showModelFrame = value;
+
+        for (const model of this.models) {
+            if (model?.pixiModel) {
+                model.pixiModel.backgroundVisible = value;
+            }
+        }
+
+        save('modelFrame', value);
+    }
+
+    get showModelFrame(): boolean {
+        return this._showModelFrame;
+    }
+
+    set showHitAreaFrames(value: boolean) {
+        this._showHitAreaFrames = value;
+
+        for (const model of this.models) {
+            if (model?.pixiModel) {
+                model.pixiModel.hitAreaFrames.visible = value;
+            }
+        }
+
+        save('hitAreaFrames', value);
+    }
+
+    get showHitAreaFrames(): boolean {
+        return this._showHitAreaFrames;
     }
 }
