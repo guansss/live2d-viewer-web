@@ -1,7 +1,7 @@
 <template>
   <div class="settings pa-3 flex-column flex-grow-1">
     <div>
-      <v-slider dense class="mt-2" prepend-icon="mdi-volume-high" v-model="volume" :messages="~~(volume*100)+'%'"
+      <v-slider dense class="mt-4 mb-10" prepend-icon="mdi-volume-high" v-model="volume" :messages="~~(volume*100)+'%'"
                 min="0" max="1" step="0.02"></v-slider>
 
       <v-switch class="v-input--reverse" v-model="hitAreaFrames" label="Show hit area frames"></v-switch>
@@ -11,11 +11,12 @@
 
     <v-spacer></v-spacer>
     <v-divider></v-divider>
-
-    <div class="pt-4 pb-1 d-flex align-center">
+    <div class="pt-4 d-flex align-center">
       <v-icon class="mr-2">mdi-github</v-icon>
       <span>View source on <a href="https://github.com/guansss/live2d-viewer-web"
                               class="text-decoration-none">GitHub</a></span></div>
+
+    <span class="pt-4 body-2 text--secondary">Last updated: {{ lastUpdated }}</span>
   </div>
 </template>
 
@@ -29,6 +30,7 @@ export default Vue.extend({
         hitAreaFrames: false,
         modelFrame: false,
         stats: false,
+        lastUpdated: new Date(__BUILD_TIME__).toLocaleString(),
     }),
     watch: {
         stats(value: boolean) {

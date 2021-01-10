@@ -17,5 +17,13 @@ module.exports = {
             // https://github.com/vuejs/vue-cli/issues/3157#issuecomment-629610739
             config.plugins.delete('fork-ts-checker');
         }
+
+        config
+            .plugin('define')
+            .tap(args => {
+                args[0].__BUILD_TIME__ = Date.now();
+
+                return args;
+            });
     },
 };
