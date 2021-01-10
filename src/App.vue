@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer absolute width="360" v-model="drawer" @transitionend="!drawer && (drawerSwitch=true)">
+    <v-navigation-drawer absolute :width="drawerWidth" v-model="drawer" @transitionend="!drawer && (drawerSwitch=true)">
       <v-toolbar color="primary">
         <v-toolbar-title>Live2D Viewer</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -41,7 +41,7 @@
 
       <Settings v-show="tab===0"/>
     </v-navigation-drawer>
-    <v-main>
+    <v-main :style="{paddingLeft:`${drawerWidth}px !important`}">
       <v-container fluid class="pa-0 fill-height flex-column">
         <v-spacer></v-spacer>
         <ModelList v-model="selectedModelID" :show="modelList.visible"/>
@@ -105,6 +105,9 @@ export default Vue.extend({
         },
     }),
     computed: {
+        drawerWidth() {
+            return this.$vuetify.breakpoint.xl ? 450 : 360;
+        },
         modelName() {
             return this.$live2dApp.getModel(this.selectedModelID)?.name || '';
         },
@@ -136,9 +139,6 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="stylus">
-.v-main
-  padding-left 360px !important
-
 >>> .v-navigation-drawer__content
   display flex
   flex-direction column
