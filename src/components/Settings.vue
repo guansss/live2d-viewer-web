@@ -6,6 +6,7 @@
 
       <v-switch class="v-input--reverse" v-model="hitAreaFrames" label="Show hit area frames"></v-switch>
       <v-switch class="v-input--reverse" v-model="modelFrame" label="Show model frames"></v-switch>
+      <v-switch class="v-input--reverse" v-model="stats" label="Show stats"></v-switch>
     </div>
 
     <v-spacer></v-spacer>
@@ -27,8 +28,12 @@ export default Vue.extend({
         volume: 0,
         hitAreaFrames: false,
         modelFrame: false,
+        stats: false,
     }),
     watch: {
+        stats(value: boolean) {
+            this.$live2dApp.showStats = value;
+        },
         volume(value: number) {
             this.$live2dApp.volume = value;
         },
@@ -40,6 +45,7 @@ export default Vue.extend({
         },
     },
     created() {
+        this.stats = this.$live2dApp.showStats;
         this.volume = this.$live2dApp.volume;
         this.hitAreaFrames = this.$live2dApp.showHitAreaFrames;
         this.modelFrame = this.$live2dApp.showModelFrame;

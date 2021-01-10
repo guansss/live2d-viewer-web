@@ -18,6 +18,7 @@
     "node-fetch": "^2.6.1",
     "pixi-live2d-display": "^0.3.0-beta.2",
     "pixi.js": "^5.3.6",
+    "stats.js": "^0.17.0",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^8.4.2",

@@ -9,6 +9,12 @@ import { Extract } from '@pixi/extract';
 import './patches';
 import './zip';
 import { load, save } from '@/tools/storage';
+import Stats from 'stats.js';
+
+const stats = new Stats();
+stats.showPanel(0);
+stats.dom.style.left = '';
+stats.dom.style.right = '0';
 
 Application.registerPlugin(TickerPlugin as any);
 Live2DModel.registerTicker(Ticker);
@@ -27,16 +33,29 @@ export class Live2DApp {
     private _volume = load('volume', 0.5);
     private _showHitAreaFrames = load('hitAreaFrames', true);
     private _showModelFrame = load('modelFrame', false);
+    private _showStats = load('stats', true);
 
     constructor(canvas: HTMLCanvasElement) {
         this.pixiApp = new Application({
             view: canvas,
             resizeTo: window,
             antialias: true,
+            backgroundColor: 0x111111,
+            autoStart: false,
         });
         this.pixiApp.stage.interactive = true;
 
-        SoundManager.volume = this.volume;
+        this.pixiApp.ticker.add(() => {
+            stats.begin();
+            this.pixiApp.render();
+            stats.end();
+        });
+
+        this.pixiApp.start();
+
+        // trigger the setters
+        this.showStats = this.showStats;
+        this.volume = this.volume;
     }
 
     addModel(source: string | ExtendedFileList): number {
@@ -78,6 +97,22 @@ export class Live2DApp {
 
             model.destroy();
         }
+    }
+
+    get showStats(): boolean {
+        return this._showStats;
+    }
+
+    set showStats(value: boolean) {
+        this._showStats = value;
+
+        if (value) {
+            document.body.appendChild(stats.dom);
+        } else {
+            stats.dom.parentElement?.removeChild(stats.dom);
+        }
+
+        save('stats', value);
     }
 
     get volume(): number {
