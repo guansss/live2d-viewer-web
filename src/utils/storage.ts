@@ -7,7 +7,7 @@ export function save(key: string) {
             saveValue(key, value);
         };
 
-        const value = loadValue(propertyKey, descriptor.get!.call(target));
+        const value = loadValue(key, descriptor.get!.call(target));
         set.call(target, value);
     };
 }
