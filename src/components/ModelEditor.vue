@@ -20,7 +20,7 @@
         </v-list-item>
       </v-list-group>
 
-      <v-list-group :value="true">
+      <v-list-group>
         <template v-slot:activator>
           <v-list-item-content>
             <v-list-item-title>Motions</v-list-item-title>
@@ -48,6 +48,20 @@
           </template>
         </template>
       </v-list-group>
+
+      <v-list-group>
+        <template v-slot:activator>
+          <v-list-item-content>
+            <v-list-item-title>Filters</v-list-item-title>
+          </v-list-item-content>
+        </template>
+
+        <v-subheader class="mt-3 pl-3">Not working properly with Cubism 4</v-subheader>
+
+        <v-checkbox v-for="filter in filters" v-model="model.filters" class="v-input--reverse mx-3 mt-0" :key="filter"
+                    :label="filter+(index=>index?` [${index}]`:'')(model.filters.indexOf(filter)+1)"
+                    :value="filter"></v-checkbox>
+      </v-list-group>
     </v-list>
   </div>
 </template>
@@ -59,6 +73,7 @@ import { Live2DModel } from '@/app/Live2DModel';
 import { MotionPriority, MotionState } from 'pixi-live2d-display';
 import clamp from 'lodash/clamp';
 import { App } from '@/app/App';
+import { Filter } from '@/app/Filter';
 
 interface MotionGroup {
     name: string
@@ -88,6 +103,8 @@ export default Vue.extend({
         motionProgressStyle: {
             transform: `translateX(-100%)`,
         },
+
+        filters: Object.keys(Filter.filters),
     }),
     computed: {
         rotationDeg() {
@@ -101,11 +118,8 @@ export default Vue.extend({
                 this.updateModel();
             },
         },
-        scaleX(scaleX: number) {
-            this.model!.scale(scaleX, scaleX);
-        },
-        rotation(rotation: number) {
-            this.model!.rotate(rotation);
+        'model.filters'() {
+            this.model?.updateFilters();
         },
 
         // immediately update progress when current motion has changed

@@ -3,6 +3,7 @@ import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools/dragging';
 import { settings } from '@pixi/settings';
 import { Renderer } from '@pixi/core';
+import { Filter } from '@/app/Filter';
 
 // 1x1 green image
 const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
@@ -23,6 +24,8 @@ export class ModelEntity extends EventEmitter {
     private _scaleY = 1;
     private _rotation = 0;
     private _zIndex = 0;
+
+    filters: (keyof typeof Filter.filters)[] = [];
 
     error = '';
 
@@ -60,6 +63,8 @@ export class ModelEntity extends EventEmitter {
         this.name = pixiModel.internalModel.settings.name;
         this.thumbnail = THUMBNAIL;
         this.aspectRatio = pixiModel.width / pixiModel.height;
+
+        this.updateFilters();
 
         draggable(pixiModel);
     }
@@ -126,6 +131,12 @@ export class ModelEntity extends EventEmitter {
 
         if (this.pixiModel) {
             this.pixiModel.visible = visible;
+        }
+    }
+
+    updateFilters() {
+        if (this.pixiModel) {
+            Filter.set(this.pixiModel, this.filters);
         }
     }
 

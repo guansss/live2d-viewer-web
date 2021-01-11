@@ -5,6 +5,7 @@ import { Texture } from '@pixi/core';
 import { Ticker } from '@pixi/ticker';
 import './patches';
 import './zip';
+import { Filter } from '@/app/Filter';
 
 BaseLive2DModel.registerTicker(Ticker);
 
@@ -106,5 +107,11 @@ export class Live2DModel extends BaseLive2DModel {
         }
 
         super._render(renderer);
+    }
+
+    destroy(options?: { children?: boolean; texture?: boolean; baseTexture?: boolean }) {
+        super.destroy(options);
+
+        Filter.release(this);
     }
 }

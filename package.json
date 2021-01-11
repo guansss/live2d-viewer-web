@@ -9,6 +9,10 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@pixi/filter-ascii": "^3.1.1",
+    "@pixi/filter-crt": "^3.2.0",
+    "@pixi/filter-outline": "^3.2.0",
+    "@pixi/filter-pixelate": "^3.1.1",
     "@types/lodash": "^4.14.166",
     "@vue/cli": "^4.5.9",
     "gh-pages": "^3.1.0",

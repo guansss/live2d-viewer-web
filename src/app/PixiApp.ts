@@ -4,6 +4,7 @@ import { BatchRenderer, Renderer } from '@pixi/core';
 import { Extract } from '@pixi/extract';
 import { InteractionManager } from '@pixi/interaction';
 import Stats from 'stats.js';
+import { Filter } from '@/app/Filter';
 
 Application.registerPlugin(TickerPlugin as any);
 
@@ -25,7 +26,11 @@ export class PixiApp extends Application {
 
         this.ticker.add(() => {
             stats.begin();
+
+            Filter.update(this.ticker.deltaMS);
+
             this.render();
+
             stats.end();
         });
     }

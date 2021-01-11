@@ -20,6 +20,10 @@ declare module '@pixi/display' {
     export { DisplayObject, Container } from 'pixi.js';
 }
 
+declare module '@pixi/filter-*' {
+    export { AlphaFilter, NoiseFilter } from 'pixi.js';
+}
+
 declare module '@pixi/sprite' {
     export { Sprite } from 'pixi.js';
 }
