@@ -10,12 +10,6 @@ stats.showPanel(0);
 stats.dom.style.left = '';
 stats.dom.style.right = '0';
 
-setTimeout(() => {
-    for (let i = 0; i < 5; i++) {
-        App.addModel('https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/Live2D/Senko_Normals/senko.model3.json');
-    }
-}, 0);
-
 export class App {
     static models: ModelEntity[] = [];
 
