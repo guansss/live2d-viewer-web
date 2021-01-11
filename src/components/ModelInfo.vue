@@ -18,7 +18,7 @@
       </v-toolbar>
 
       <v-card-text class="pa-8 overflow-auto">
-        <div class="mb-6">URL: {{ url }}</div>
+        <div class="mb-6 text-no-wrap">URL: {{ url }}</div>
         <pre class="code">{{ settingsJSON }}</pre>
       </v-card-text>
     </v-card>

@@ -1,39 +1,36 @@
 <template>
   <v-slide-y-reverse-transition>
-    <v-sheet v-if="show&&models.length" width="100%">
-      <v-row class="ma-0">
-        <v-item-group mandatory class="flex-grow-1" :value="selectedIndex" @change="select">
-          <transition-group class="model-list d-flex pa-2" name="move">
-            <v-item v-for="(model,i) in models" :key="model.id" v-slot="{ active, toggle }">
-              <v-card :color="model.error?'#631f1f':active?'blue-grey darken-3':'blue-grey darken-4'" class="ma-2"
-                      @click="toggle">
-                <v-tooltip top :disabled="!model.error">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-img :src="model.thumbnail" :width="model.error?192:model.aspectRatio*192" height="192"
-                           v-bind="attrs" v-on="on">
-                      <template v-slot:placeholder>
-                        <v-row class="fill-height ma-0" align="center" justify="center">
-                          <v-progress-circular v-if="!model.error" indeterminate
-                                               color="grey lighten-5"></v-progress-circular>
-                          <v-icon v-else>mdi-alert-circle</v-icon>
-                        </v-row>
-                      </template>
+    <v-sheet v-if="show&&models.length" class="model-list" width="100%">
+      <v-item-group mandatory class="flex-grow-1" :value="selectedIndex" @change="select">
+        <transition-group class="model-group d-flex pa-2" name="move">
+          <v-item v-for="(model,i) in models" :key="model.id" v-slot="{ active, toggle }">
+            <v-card :color="model.error?'#631f1f':active?'grey darken-2':'grey darken-3'" class="ma-2" @click="toggle">
+              <v-tooltip top :disabled="!model.error">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-img :src="model.thumbnail" :width="model.error?192:model.aspectRatio*192" height="192"
+                         v-bind="attrs" v-on="on">
+                    <template v-slot:placeholder>
+                      <v-row class="fill-height ma-0" align="center" justify="center">
+                        <v-progress-circular v-if="!model.error" indeterminate
+                                             color="grey lighten-5"></v-progress-circular>
+                        <v-icon v-else>mdi-alert-circle</v-icon>
+                      </v-row>
+                    </template>
 
-                      <v-card-title class="ml-1 pa-0 flex-nowrap subtitle-1">
-                        <span class="model-item-title text-truncate">{{ '#' + model.id + ' ' + model.name }}</span>
-                        <v-spacer></v-spacer>
-                        <v-btn icon v-if="active" @click.stop="remove(model.id)"><v-icon size="20">mdi-close</v-icon>
-                        </v-btn>
-                      </v-card-title>
-                    </v-img>
-                  </template>
-                  {{ model.error }}
-                </v-tooltip>
-              </v-card>
-            </v-item>
-          </transition-group>
-        </v-item-group>
-      </v-row>
+                    <v-card-title class="ml-1 pa-0 flex-nowrap subtitle-1">
+                      <span class="model-item-title text-truncate">{{ '#' + model.id + ' ' + model.name }}</span>
+                      <v-spacer></v-spacer>
+                      <v-btn icon v-if="active" @click.stop="remove(model.id)"><v-icon size="20">mdi-close</v-icon>
+                      </v-btn>
+                    </v-card-title>
+                  </v-img>
+                </template>
+                {{ model.error }}
+              </v-tooltip>
+            </v-card>
+          </v-item>
+        </transition-group>
+      </v-item-group>
     </v-sheet>
   </v-slide-y-reverse-transition>
 </template>
@@ -78,11 +75,24 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="stylus">
-.v-sheet
-  pointer-events auto
-
 .model-list
+  position relative
+  background-color transparent !important
+
+  &:before
+    content ''
+    position absolute
+    top 0
+    right 0
+    bottom 0
+    left 0
+    background-color rgba(0, 0, 0, .3)
+
+.model-group
   overflow auto
+
+.v-card
+  pointer-events auto
 
 .model-item-title
   line-height 36px
