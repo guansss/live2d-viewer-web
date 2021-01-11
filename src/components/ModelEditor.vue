@@ -54,10 +54,11 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { ModelEntity } from '@/live2d/ModelEntity';
-import { Live2DModel } from '@/live2d/Live2DModel';
+import { ModelEntity } from '@/app/ModelEntity';
+import { Live2DModel } from '@/app/Live2DModel';
 import { MotionPriority, MotionState } from 'pixi-live2d-display';
 import clamp from 'lodash/clamp';
+import { App } from '@/app/App';
 
 interface MotionGroup {
     name: string
@@ -117,7 +118,7 @@ export default Vue.extend({
         updateModel() {
             this.resetModel();
 
-            this.model = this.$live2dApp.getModel(this.id);
+            this.model = App.getModel(this.id);
 
             if (this.model) {
                 if (this.model.pixiModel) {

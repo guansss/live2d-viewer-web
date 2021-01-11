@@ -6,10 +6,11 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { uploadedFiles } from '@/live2d/upload';
+import { uploadedFiles } from '@/app/upload';
 import { isDraggingFile, readFiles } from '@/utils/file';
 import { ExtendedFileList } from 'pixi-live2d-display';
-import { Background } from '@/tools/background';
+import { Background } from '@/tools/Background';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     name: "DropZone",
@@ -49,10 +50,10 @@ export default Vue.extend({
 
                         fileList.settings = settings;
 
-                        this.$live2dApp.addModel(fileList);
+                        App.addModel(fileList);
                     }
                 } else {
-                    this.$live2dApp.addModel(files);
+                    App.addModel(files);
                 }
             } catch (e) {
                 e.message = 'Failed to load model: ' + e.message;

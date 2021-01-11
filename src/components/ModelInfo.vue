@@ -27,6 +27,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     name: "ModelInfo",
@@ -41,7 +42,7 @@ export default Vue.extend({
     watch: {
         value(value: boolean) {
             if (value) {
-                const settings = this.$live2dApp.getModel(this.id)?.pixiModel?.internalModel.settings;
+                const settings = App.getModel(this.id)?.pixiModel?.internalModel.settings;
 
                 this.url = settings?.url || '';
                 this.settingsJSON = JSON.stringify(settings?.json || {}, null, 2);

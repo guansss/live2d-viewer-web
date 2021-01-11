@@ -75,7 +75,8 @@ import ModelEditor from '@/components/ModelEditor.vue';
 import DropZone from '@/components/DropZone.vue';
 import Settings from '@/components/Settings.vue';
 import ModelInfo from '@/components/ModelInfo.vue';
-import { Background } from '@/tools/background';
+import { Background } from '@/tools/Background';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     name: 'App',
@@ -111,7 +112,7 @@ export default Vue.extend({
             return this.$vuetify.breakpoint.xl ? 450 : 360;
         },
         modelName() {
-            return this.$live2dApp.getModel(this.selectedModelID)?.name || '';
+            return App.getModel(this.selectedModelID)?.name || '';
         },
     },
     methods: {

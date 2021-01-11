@@ -1,9 +1,14 @@
-import { Live2DModel as _Live2DModel } from 'pixi-live2d-display';
+import { Live2DModel as BaseLive2DModel } from 'pixi-live2d-display';
 import { HitAreaFrames } from 'pixi-live2d-display/src/tools/HitAreaFrames';
 import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
+import { Ticker } from '@pixi/ticker';
+import './patches';
+import './zip';
 
-export class Live2DModel extends _Live2DModel {
+BaseLive2DModel.registerTicker(Ticker);
+
+export class Live2DModel extends BaseLive2DModel {
     hitAreaFrames: HitAreaFrames;
     background: Sprite;
 

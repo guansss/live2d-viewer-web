@@ -12,7 +12,7 @@ import { ping } from '@/utils';
 import { url as urlUtils } from '@pixi/utils';
 import { getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
-import { isMocFile, isMocFileV3 } from '@/live2d/helpers';
+import { isMocFile, isMocFileV3 } from './helpers';
 
 // replace the default urlToJSON middleware
 Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(defaultURLToJSON), 1, urlToJSON);

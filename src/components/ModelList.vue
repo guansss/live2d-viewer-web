@@ -40,7 +40,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { ModelEntity } from '@/live2d/ModelEntity';
+import { ModelEntity } from '@/app/ModelEntity';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     name: "ModelList",
@@ -57,7 +58,7 @@ export default Vue.extend({
         },
     },
     created() {
-        this.models = this.$live2dApp.models;
+        this.models = App.models;
     },
     methods: {
         select(index: number) {
@@ -66,7 +67,7 @@ export default Vue.extend({
             this.$emit('input', id);
         },
         remove(id: number) {
-            this.$live2dApp.removeModel(id);
+            App.removeModel(id);
 
             if (this.models.length === 0) {
                 this.$emit('input', 0);

@@ -1,4 +1,4 @@
-import { Live2DModel } from '@/live2d/Live2DModel';
+import { Live2DModel } from '@/app/Live2DModel';
 import { InteractionEvent } from '@pixi/interaction';
 
 export interface DraggableLive2DModel extends Live2DModel {

@@ -1,5 +1,5 @@
 import { Cubism2ModelSettings, Cubism4ModelSettings, FileLoader, ModelSettings } from 'pixi-live2d-display';
-import { isMocFile, isMocFileV2, isSettingsFile } from '@/live2d/helpers';
+import { isMocFile, isMocFileV2, isSettingsFile } from './helpers';
 
 const MAX_SETTINGS_FILES = 5;
 

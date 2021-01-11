@@ -1,5 +1,5 @@
 import { CommonModelJSON } from '@/global';
-import { isMocFile, isSettingsFile } from '@/live2d/helpers';
+import { isMocFile, isSettingsFile } from './helpers';
 
 export interface TreeNode {
     id: number;

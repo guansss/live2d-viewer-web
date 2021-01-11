@@ -1,4 +1,4 @@
-import { Live2DApp } from '@/live2d/Live2DApp';
+import { Live2DApp } from '@/app/Live2DApp';
 
 declare module '*.vue' {
     import Vue from 'vue';

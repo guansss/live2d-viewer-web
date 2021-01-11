@@ -1,4 +1,4 @@
-import { Live2DModel } from '@/live2d/Live2DModel';
+import { Live2DModel } from './Live2DModel';
 import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools/dragging';
 import { settings } from '@pixi/settings';
@@ -28,12 +28,8 @@ export class ModelEntity extends EventEmitter {
 
     pixiModel?: Live2DModel;
 
-    renderer: Renderer;
-
     constructor(source: string | File[], renderer: Renderer) {
         super();
-
-        this.renderer = renderer;
 
         this.loadModel(source).then();
     }
@@ -56,7 +52,6 @@ export class ModelEntity extends EventEmitter {
         if (this.pixiModel) {
             this.initModel(this.pixiModel);
             this.emit('modelLoaded', this.pixiModel);
-            this.initThumbnail(this.pixiModel);
         }
     }
 
@@ -69,7 +64,8 @@ export class ModelEntity extends EventEmitter {
         draggable(pixiModel);
     }
 
-    initThumbnail(pixiModel: Live2DModel) {
+    initThumbnail(renderer: Renderer) {
+        const pixiModel = this.pixiModel!;
         settings.RESOLUTION = 0.2;
 
         const hitAreaFramesVisible = pixiModel.hitAreaFrames.visible;
@@ -78,7 +74,7 @@ export class ModelEntity extends EventEmitter {
         pixiModel.backgroundVisible = false;
 
         try {
-            const canvas = this.renderer.extract.canvas(pixiModel);
+            const canvas = renderer.extract.canvas(pixiModel);
 
             canvas.toBlob(blob => this.thumbnail = URL.createObjectURL(blob), 'image/webp', 0.01);
         } catch (e) {

@@ -32,7 +32,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Background } from '@/tools/background';
+import { Background } from '@/tools/Background';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     name: "Settings",
@@ -46,23 +47,23 @@ export default Vue.extend({
     }),
     watch: {
         stats(value: boolean) {
-            this.$live2dApp.showStats = value;
+            App.showStats = value;
         },
         volume(value: number) {
-            this.$live2dApp.volume = value;
+            App.volume = value;
         },
         hitAreaFrames(value: boolean) {
-            this.$live2dApp.showHitAreaFrames = value;
+            App.showHitAreaFrames = value;
         },
         modelFrame(value: boolean) {
-            this.$live2dApp.showModelFrame = value;
+            App.showModelFrame = value;
         },
     },
     created() {
-        this.stats = this.$live2dApp.showStats;
-        this.volume = this.$live2dApp.volume;
-        this.hitAreaFrames = this.$live2dApp.showHitAreaFrames;
-        this.modelFrame = this.$live2dApp.showModelFrame;
+        this.stats = App.showStats;
+        this.volume = App.volume;
+        this.hitAreaFrames = App.showHitAreaFrames;
+        this.modelFrame = App.showModelFrame;
 
         Background.emitter.on('change', this.backgroundChanged, this);
     },

@@ -35,7 +35,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import ModelPicker from './ModelPicker.vue';
-import { validateURL } from '@/live2d/data';
+import { validateURL } from '@/app/data';
+import { App } from '@/app/App';
 
 export default Vue.extend({
     components: { ModelPicker },
@@ -77,7 +78,7 @@ export default Vue.extend({
                 return;
             }
 
-            const id = this.$live2dApp.addModel(this.url);
+            const id = App.addModel(this.url);
 
             this.$emit('input', false);
             this.$emit('create', id);
