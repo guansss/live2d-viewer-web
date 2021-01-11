@@ -41,17 +41,15 @@ export class Live2DApp {
             resizeTo: window,
             antialias: true,
             transparent: true,
-            autoStart: false,
         });
-        this.pixiApp.stage.interactive = true;
+
+        this.pixiApp.ticker.remove(this.pixiApp.render, this.pixiApp);
 
         this.pixiApp.ticker.add(() => {
             stats.begin();
             this.pixiApp.render();
             stats.end();
         });
-
-        this.pixiApp.start();
 
         // trigger the setters
         this.showStats = this.showStats;
