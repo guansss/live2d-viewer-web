@@ -10,8 +10,6 @@ export interface DraggableLive2DModel extends Live2DModel {
 export function draggable(_model: Live2DModel) {
     const model = _model as DraggableLive2DModel;
 
-    model.buttonMode = true;
-
     model.on("pointerdown", onPointerDown);
     model.on("pointermove", onPointerMove);
     model.on("pointerup", onPointerUp);
