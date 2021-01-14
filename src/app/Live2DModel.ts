@@ -42,13 +42,6 @@ export class Live2DModel extends BaseLive2DModel {
 
         this.on('hit', this.startHitMotion);
 
-        // TODO: remove this when upgrading pixi-live2d-display to beta.3
-        (this.internalModel.motionManager as any).queueManager.setEventCallback?.(
-            (caller: any, eventValue: string) => {
-                this.emit('motion:' + eventValue);
-            },
-        );
-
         this.internalModel.motionManager.on('motionStart', (group: string, index: number) => {
             this.currentMotionStartTime = this.elapsedTime;
             this.currentMotionDuration = 0;
@@ -63,6 +56,29 @@ export class Live2DModel extends BaseLive2DModel {
                 }
             }
         });
+
+        const expressionManager = this.internalModel.motionManager.expressionManager;
+
+        if (expressionManager) {
+            const originalStartMotion = (expressionManager as any).startMotion;
+
+            (expressionManager as any).startMotion = (expression: any) => {
+                originalStartMotion.call(expressionManager, expression);
+
+                this.emit('expressionSet', expressionManager.expressions.indexOf(expression));
+            };
+
+            let reserveExpressionIndex = expressionManager.reserveExpressionIndex;
+
+            Object.defineProperty(expressionManager, 'reserveExpressionIndex', {
+                get: () => reserveExpressionIndex,
+                set: (index: number) => {
+                    reserveExpressionIndex = index;
+
+                    this.emit('expressionReserved', index);
+                },
+            });
+        }
     }
 
     startHitMotion(hitAreaNames: string[]) {

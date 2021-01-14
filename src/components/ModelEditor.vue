@@ -20,10 +20,12 @@
         </v-list-item>
       </v-list-group>
 
-      <v-list-group>
+      <v-list-group :set="motionCount=motionGroups.reduce((sum, { motions }) => sum + motions.length, 0)"
+                    :disabled="!motionCount">
         <template v-slot:activator>
           <v-list-item-content>
-            <v-list-item-title>Motions</v-list-item-title>
+            <v-list-item-title :class="{'text--secondary':!motionCount}">Motions ({{ motionCount }})
+            </v-list-item-title>
           </v-list-item-content>
         </template>
 
@@ -41,11 +43,35 @@
               </v-list-item-content>
               <v-list-item-icon class="my-0 align-self-center">
                 <v-icon size="32" color="primary" v-if="active">mdi-play</v-icon>
-                <v-progress-circular indeterminate size="20" v-else-if="(motionState.reservedGroup===motionGroup.name&&motionState.reservedIndex===i)
-                    ||(motionState.reservedIdleGroup===motionGroup.name&&motionState.reservedIdleIndex===i)"></v-progress-circular>
+                <v-progress-circular indeterminate size="20" width="2" v-else-if="(motionState.reservedGroup===motionGroup.name&&motionState.reservedIndex===i)
+                    ||(motionState.reservedIdleGroup===motionGroup.name&&motionState.reservedIdleIndex===i)"/>
               </v-list-item-icon>
             </v-list-item>
           </template>
+        </template>
+      </v-list-group>
+
+      <v-list-group :disabled="!expressions.length">
+        <template v-slot:activator>
+          <v-list-item-content>
+            <v-list-item-title :class="{'text--secondary':!expressions.length}">Expressions ({{ expressions.length }})
+            </v-list-item-title>
+          </v-list-item-content>
+        </template>
+
+        <template v-slot:default>
+          <v-list-item ripple v-for="(expression,i) in expressions" :key="i" :set="active=currentExpressionIndex===i"
+                       :disabled="!!expression.error" @click="setExpression(i)">
+            <v-list-item-content :title="expression.file">
+              <v-list-item-title :class="{'primary--text':active,'text-decoration-line-through':expression.error}">
+                {{ expression.file.replace('.exp.json', '').replace('.exp3.json', '') }}
+              </v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-icon class="my-0 align-self-center">
+              <v-icon size="28" color="primary" v-if="active">mdi-emoticon-outline</v-icon>
+              <v-progress-circular indeterminate size="20" width="2" v-else-if="pendingExpressionIndex===i"/>
+            </v-list-item-icon>
+          </v-list-item>
         </template>
       </v-list-group>
 
@@ -75,12 +101,17 @@ import clamp from 'lodash/clamp';
 import { App } from '@/app/App';
 import { Filter } from '@/app/Filter';
 
-interface MotionGroup {
+interface MotionGroupEntry {
     name: string
     motions: {
         file: string;
         error?: any;
     }[]
+}
+
+interface ExpressionEntry {
+    file: string;
+    error?: any;
 }
 
 export default Vue.extend({
@@ -97,13 +128,17 @@ export default Vue.extend({
         selectedMotionGroup: '',
         selectedMotionIndex: -1,
 
-        motionGroups: [] as MotionGroup[],
+        motionGroups: [] as MotionGroupEntry[],
         motionState: null as MotionState | null | undefined,
 
         motionProgressUpdateID: -1,
         motionProgressStyle: {
             transform: `translateX(-100%)`,
         },
+
+        expressions: [] as ExpressionEntry[],
+        currentExpressionIndex: -1,
+        pendingExpressionIndex: -1,
 
         filters: Object.keys(Filter.filters),
     }),
@@ -146,7 +181,10 @@ export default Vue.extend({
         resetModel() {
             if (this.model) {
                 this.model.off('modelLoaded', this.pixiModelLoaded);
-                this.model.pixiModel?.internalModel.motionManager.off('motionLoadError', this.motionLoadError);
+                this.model.pixiModel?.off('expressionSet', this.expressionSet);
+                this.model.pixiModel?.off('expressionReserved', this.expressionReserved);
+                this.model.pixiModel?.internalModel.motionManager?.off('motionLoadError', this.motionLoadError);
+                this.model.pixiModel?.internalModel.motionManager?.expressionManager?.off('expressionLoadError', this.expressionLoadError);
 
                 this.motionGroups = [];
                 this.motionState = undefined;
@@ -155,7 +193,7 @@ export default Vue.extend({
         },
         pixiModelLoaded(pixiModel: Live2DModel) {
             const motionManager = pixiModel.internalModel.motionManager;
-            const motionGroups: MotionGroup[] = [];
+            const motionGroups: MotionGroupEntry[] = [];
 
             const definitions = motionManager.definitions;
 
@@ -172,7 +210,25 @@ export default Vue.extend({
             this.motionGroups = motionGroups;
             this.motionState = motionManager.state;
 
+            const expressionManager = motionManager.expressionManager;
+            this.expressions = expressionManager?.definitions.map((expression, index) => ({
+                file: expression.file || expression.File || '',
+                error: expressionManager!.expressions[index]! === null ? 'Failed to load' : undefined,
+            })) || [];
+
+            this.currentExpressionIndex = expressionManager?.expressions.indexOf(expressionManager!.currentExpression) ?? -1;
+            this.pendingExpressionIndex = expressionManager?.reserveExpressionIndex ?? -1;
+
+            pixiModel.on('expressionSet', this.expressionSet);
+            pixiModel.on('expressionReserved', this.expressionReserved);
             motionManager.on('motionLoadError', this.motionLoadError);
+            expressionManager?.on('expressionLoadError', this.expressionLoadError);
+        },
+        expressionSet(index: number) {
+            this.currentExpressionIndex = index;
+        },
+        expressionReserved(index: number) {
+            this.pendingExpressionIndex = index;
         },
         motionLoadError(group: string, index: number, error: any) {
             const motionGroup = this.motionGroups.find(motionGroup => motionGroup.name === group);
@@ -181,8 +237,14 @@ export default Vue.extend({
                 motionGroup.motions[index]!.error = error;
             }
         },
-        startMotion(motionGroup: MotionGroup, index: number) {
-            this.model!.pixiModel!.motion(motionGroup.name, index, MotionPriority.FORCE);
+        expressionLoadError(index: number, error: any) {
+            this.expressions[index]!.error = error;
+        },
+        startMotion(motionGroup: MotionGroupEntry, index: number) {
+            this.model?.pixiModel?.motion(motionGroup.name, index, MotionPriority.FORCE);
+        },
+        setExpression(index: number) {
+            this.model?.pixiModel?.expression(index);
         },
         updateMotionProgress() {
             if (!this.model?.pixiModel) {
