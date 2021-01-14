@@ -9,6 +9,7 @@ import {
 } from 'pixi-live2d-display';
 import JSON5 from 'json5';
 import { ping } from '@/utils';
+import unionBy from 'lodash/unionBy';
 import { url as urlUtils } from '@pixi/utils';
 import { getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
@@ -130,6 +131,8 @@ const patches: {
     search: '少女前线', // 少女前线 Girls Frontline
 
     async patch(json: Partial<Cubism2Spec.ModelJSON>, url: string) {
+        extractCubism2IdleMotions(json, ['daiji']);
+
         // prefix paths of motion files
         if (json.motions?.idle?.length) {
             // only check and fix the first one
@@ -144,8 +147,6 @@ const patches: {
                 }
             }
         }
-
-        extractCubism2IdleMotions(json, ['daiji']);
     },
 }, {
     search: 'アンノウンブライド', // アンノウンブライド Unknown Bride
@@ -296,7 +297,7 @@ function extractCubism2IdleMotions(json: Partial<Cubism2Spec.ModelJSON>, keyword
         }
 
         if (idleMotions.length) {
-            json.motions.idle = (json.motions.idle || []).concat(idleMotions);
+            json.motions.idle = unionBy(json.motions.idle, idleMotions, 'file');
         }
     }
 }
@@ -324,7 +325,7 @@ function extractCubism4IdleMotions(json: Partial<CubismSpec.ModelJSON>, keywords
         }
 
         if (idleMotions.length) {
-            json.FileReferences.Motions.Idle = (json.FileReferences.Motions.Idle || []).concat(idleMotions);
+            json.FileReferences.Motions.Idle = unionBy(json.FileReferences.Motions.Idle, idleMotions, 'File');
         }
     }
 }
