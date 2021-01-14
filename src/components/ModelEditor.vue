@@ -21,7 +21,7 @@
       </v-list-group>
 
       <v-list-group :set="motionCount=motionGroups.reduce((sum, { motions }) => sum + motions.length, 0)"
-                    :disabled="!motionCount">
+                    :disabled="!motionCount" v-model="motionExpand">
         <template v-slot:activator>
           <v-list-item-content>
             <v-list-item-title :class="{'text--secondary':!motionCount}">Motions ({{ motionCount }})
@@ -35,7 +35,7 @@
             <v-list-item ripple v-for="(motion,i) in motionGroup.motions" :key="motionGroup.name+i"
                          :set="active=motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i"
                          :disabled="!!motion.error" @click="startMotion(motionGroup,i)">
-              <div v-if="active" class="motion-progress" :style="motionProgressStyle"></div>
+              <div v-if="active" class="motion-progress"></div>
               <v-list-item-content :title="motion.file">
                 <v-list-item-title :class="{'primary--text':active,'text-decoration-line-through':motion.error}">
                   {{ motion.file.replace('.mtn', '').replace('.motion3.json', '') }}
@@ -119,22 +119,18 @@ export default Vue.extend({
     props: {
         id: {
             type: Number,
-            default: -1,
+            default: 0,
         },
+        visible: Boolean,
     },
     data: () => ({
         model: null as ModelEntity | null | undefined,
 
-        selectedMotionGroup: '',
-        selectedMotionIndex: -1,
-
+        motionExpand: false,
         motionGroups: [] as MotionGroupEntry[],
         motionState: null as MotionState | null | undefined,
 
-        motionProgressUpdateID: -1,
-        motionProgressStyle: {
-            transform: `translateX(-100%)`,
-        },
+        motionProgressTimerID: -1,
 
         expressions: [] as ExpressionEntry[],
         currentExpressionIndex: -1,
@@ -161,8 +157,8 @@ export default Vue.extend({
         // immediately update progress when current motion has changed
         'motionState.currentGroup': 'updateMotionProgress',
     },
-    created() {
-        this.motionProgressUpdateID = setInterval(this.updateMotionProgress.bind(this), 50);
+    mounted() {
+        this.motionProgressTimerID = setInterval(this.updateMotionProgress, 50);
     },
     methods: {
         updateModel() {
@@ -247,7 +243,7 @@ export default Vue.extend({
             this.model?.pixiModel?.expression(index);
         },
         updateMotionProgress() {
-            if (!this.model?.pixiModel) {
+            if (!(this.model?.pixiModel && this.motionState?.currentGroup !== undefined && this.motionExpand && this.visible && this.$el)) {
                 return;
             }
 
@@ -255,12 +251,13 @@ export default Vue.extend({
             const duration = this.model.pixiModel.currentMotionDuration;
             const progress = clamp((this.model.pixiModel.elapsedTime - startTime) / duration, 0, 1);
 
-            this.motionProgressStyle.transform = `translateX(${(progress - 1) * 100}%)`;
+            // Using a CSS variable can be a lot faster than letting Vue update a style object bound to the element
+            (this.$el as HTMLElement).style.setProperty('--progress', (progress - 1) * 100 + '%');
         },
     },
     beforeDestroy() {
         this.resetModel();
-        clearInterval(this.motionProgressUpdateID);
+        clearInterval(this.motionProgressTimerID);
     },
 });
 </script>
@@ -278,5 +275,5 @@ export default Vue.extend({
   right 0
   opacity .24
   background var(--v-primary-base)
-  transform translateX(-100%)
+  transform translateX(var(--progress, -100%))
 </style>

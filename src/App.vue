@@ -36,7 +36,7 @@
 
         <v-divider></v-divider>
 
-        <ModelEditor v-if="tab===undefined" :id="selectedModelID"/>
+        <ModelEditor :id="selectedModelID" :visible="drawer&&tab===undefined"/>
       </div>
 
       <Settings v-show="tab===0"/>
