@@ -64,11 +64,11 @@ export default Vue.extend({
             this.$emit('input', id);
         },
         remove(id: number) {
-            App.removeModel(id);
-
             if (this.models.length === 0) {
                 this.$emit('input', 0);
             }
+
+            App.removeModel(id);
         },
     },
 });

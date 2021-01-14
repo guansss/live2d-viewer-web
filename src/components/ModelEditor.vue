@@ -32,10 +32,10 @@
             <v-subheader :key="motionGroup.name" class="px-3">{{ motionGroup.name || '(Nameless)' }}</v-subheader>
             <v-list-item ripple v-for="(motion,i) in motionGroup.motions" :key="motionGroup.name+i"
                          :set="active=motionState.currentGroup===motionGroup.name&&motionState.currentIndex===i"
-                         @click="startMotion(motionGroup,i)">
+                         :disabled="!!motion.error" @click="startMotion(motionGroup,i)">
               <div v-if="active" class="motion-progress" :style="motionProgressStyle"></div>
               <v-list-item-content :title="motion.file">
-                <v-list-item-title :class="{'primary--text':active}">
+                <v-list-item-title :class="{'primary--text':active,'text-decoration-line-through':motion.error}">
                   {{ motion.file.replace('.mtn', '').replace('.motion3.json', '') }}
                 </v-list-item-title>
               </v-list-item-content>
@@ -78,7 +78,8 @@ import { Filter } from '@/app/Filter';
 interface MotionGroup {
     name: string
     motions: {
-        file: string
+        file: string;
+        error?: any;
     }[]
 }
 
@@ -145,6 +146,7 @@ export default Vue.extend({
         resetModel() {
             if (this.model) {
                 this.model.off('modelLoaded', this.pixiModelLoaded);
+                this.model.pixiModel?.internalModel.motionManager.off('motionLoadError', this.motionLoadError);
 
                 this.motionGroups = [];
                 this.motionState = undefined;
@@ -152,21 +154,32 @@ export default Vue.extend({
             }
         },
         pixiModelLoaded(pixiModel: Live2DModel) {
+            const motionManager = pixiModel.internalModel.motionManager;
             const motionGroups: MotionGroup[] = [];
 
-            const definitions = pixiModel.internalModel.motionManager.definitions;
+            const definitions = motionManager.definitions;
 
             for (const [group, motions] of Object.entries(definitions)) {
                 motionGroups.push({
                     name: group,
-                    motions: motions?.map(motion => ({
+                    motions: motions?.map((motion, index) => ({
                         file: motion.file || motion.File || '',
+                        error: motionManager.motionGroups[group]![index]! === null ? 'Failed to load' : undefined,
                     })) || [],
                 });
             }
 
             this.motionGroups = motionGroups;
-            this.motionState = pixiModel.internalModel.motionManager.state;
+            this.motionState = motionManager.state;
+
+            motionManager.on('motionLoadError', this.motionLoadError);
+        },
+        motionLoadError(group: string, index: number, error: any) {
+            const motionGroup = this.motionGroups.find(motionGroup => motionGroup.name === group);
+
+            if (motionGroup) {
+                motionGroup.motions[index]!.error = error;
+            }
         },
         startMotion(motionGroup: MotionGroup, index: number) {
             this.model!.pixiModel!.motion(motionGroup.name, index, MotionPriority.FORCE);
