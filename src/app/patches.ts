@@ -1,8 +1,10 @@
 import {
     Cubism2ModelSettings,
     Cubism2Spec,
+    Cubism4InternalModel,
     Cubism4ModelSettings,
     CubismSpec,
+    InternalModel,
     Live2DFactory,
     Live2DFactoryContext,
     urlToJSON as defaultURLToJSON,
@@ -10,6 +12,7 @@ import {
 import JSON5 from 'json5';
 import { ping } from '@/utils';
 import unionBy from 'lodash/unionBy';
+import snakeCase from 'lodash/snakeCase';
 import { url as urlUtils } from '@pixi/utils';
 import { getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
@@ -17,6 +20,13 @@ import { isMocFile, isMocFileV3 } from './helpers';
 
 // replace the default urlToJSON middleware
 Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(defaultURLToJSON), 1, urlToJSON);
+
+const defaultInit = (InternalModel.prototype as any).init as () => void;
+
+(InternalModel.prototype as any).init = async function() {
+    await patchInternalModel(this);
+    defaultInit.call(this);
+};
 
 async function urlToJSON(context: Live2DFactoryContext, next: (err?: any) => Promise<void>) {
     if (typeof context.source === 'string') {
@@ -102,10 +112,19 @@ async function patchJSON(json: any, url: string) {
     }
 }
 
+export async function patchInternalModel(internalModel: InternalModel) {
+    for (const patch of patches) {
+        if (internalModel.settings.url.includes(encodeURI(patch.search)) && patch.patchInternalModel) {
+            await patch.patchInternalModel(internalModel);
+        }
+    }
+}
+
 const patches: {
     search: string;
     replace?: (jsonText: string, url: string) => string;
     patch?: (json: any, url: string) => void | Promise<void>;
+    patchInternalModel?: (internalModel: any) => void | Promise<void>;
 }[] = [{
     search: '魂器学院', // 魂器学院 Horcrux College
 
@@ -233,6 +252,16 @@ const patches: {
 
     patch(json: Partial<CubismSpec.ModelJSON>) {
         extractCubism4IdleMotions(json, ['stand']);
+    },
+
+    patchInternalModel(internalModel: Cubism4InternalModel) {
+        // convert the case of parameter names
+        // e.g. ParamAngleX -> PARAM_ANGLE_X
+        for (const prop of Object.keys(internalModel) as (keyof Cubism4InternalModel)[]) {
+            if (prop.startsWith('idParam')) {
+                (internalModel as any)[prop] = snakeCase(internalModel[prop] as string).toUpperCase();
+            }
+        }
     },
 }, {
     search: 'princesses', // Sacred Sword Princesses
