@@ -10,7 +10,7 @@ export namespace Filter {
     export const filters = {
         Outline: new OutlineFilter(4),
         Pixelate: new PixelateFilter(4),
-        CRTF: new CRTFilter({
+        CRT: new CRTFilter({
             lineWidth: 3,
             lineContrast: 0.3,
             vignetting: 0,
@@ -30,8 +30,8 @@ export namespace Filter {
 
     export function update(dt: number) {
         filters.Noise.seed = Math.random();
-        filters.CRTF.seed = Math.random();
-        filters.CRTF.time += dt * 0.01;
+        filters.CRT.seed = Math.random();
+        filters.CRT.time += dt * 0.01;
     }
 
     export function release(target: DisplayObject) {

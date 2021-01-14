@@ -56,7 +56,7 @@
           </v-list-item-content>
         </template>
 
-        <v-subheader class="mt-3 pl-3">Not working properly with Cubism 4</v-subheader>
+        <div class="mt-3"></div>
 
         <v-checkbox v-for="filter in filters" v-model="model.filters" class="v-input--reverse mx-3 mt-0" :key="filter"
                     :label="filter+(index=>index?` [${index}]`:'')(model.filters.indexOf(filter)+1)"
