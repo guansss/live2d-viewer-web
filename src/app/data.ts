@@ -70,9 +70,13 @@ export function getFileURL(folder: TreeNode, file: string): string | undefined {
     const folderPath = getNodePath(folder);
 
     if (folderPath) {
-        const filePath = encodeURI(folderPath + '/' + file);
+        let filePath = encodeURI(folderPath + '/' + file);
 
-        return `https://cdn.jsdelivr.net/gh/${filePath}`;
+        // temporary fix for jsDelivr's unexpected 403 responds
+        const secondSlashIndex = filePath.indexOf('/', filePath.indexOf('/') + 1);
+        filePath = filePath.slice(0, secondSlashIndex) + '@master' + filePath.slice(secondSlashIndex);
+
+        return JSDELIVR_PREFIX + filePath;
     }
 }
 
