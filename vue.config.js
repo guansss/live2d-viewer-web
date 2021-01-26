@@ -25,5 +25,13 @@ module.exports = {
 
                 return args;
             });
+
+        config
+            .plugin('html')
+            .tap(args => {
+                args[0].title = 'Live2D Viewer Online';
+
+                return args;
+            });
     },
 };
