@@ -26,7 +26,7 @@
       <span>View source on <a href="https://github.com/guansss/live2d-viewer-web"
                               class="text-decoration-none">GitHub</a></span></div>
 
-    <span class="pt-4 body-2 text--secondary">Last updated: {{ lastUpdated }}</span>
+    <span class="pt-4 body-2 text--secondary">Last built: {{ lastUpdated }}</span>
   </div>
 </template>
 

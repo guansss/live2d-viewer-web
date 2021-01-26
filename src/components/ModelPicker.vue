@@ -43,6 +43,9 @@
       <v-divider></v-divider>
 
       <v-card-actions>
+        <span class="text--secondary">The listed models were scraped from <a target="_blank"
+                                                                             href="https://github.com/Eikanya/Live2d-model">Eikanya/Live2d-model</a>.
+          All credit goes to their respective creators.</span>
         <v-alert dense text type="error" v-visible="alert" class="mb-0">{{ alert }}</v-alert>
       </v-card-actions>
     </v-card>
