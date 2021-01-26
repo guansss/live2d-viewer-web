@@ -72,7 +72,7 @@ export function getFileURL(folder: TreeNode, file: string): string | undefined {
     if (folderPath) {
         let filePath = encodeURI(folderPath + '/' + file);
 
-        // temporary fix for jsDelivr's unexpected 403 responds
+        // temporary fix for jsDelivr's unexpected 403 responses
         const secondSlashIndex = filePath.indexOf('/', filePath.indexOf('/') + 1);
         filePath = filePath.slice(0, secondSlashIndex) + '@master' + filePath.slice(secondSlashIndex);
 
@@ -131,6 +131,9 @@ export function validateURL(url: string): string | undefined {
 export function getSettingsJSON(mocURL: string): CommonModelJSON | undefined {
     if (mocURL.startsWith(JSDELIVR_PREFIX)) {
         let mocFile = mocURL.replace(JSDELIVR_PREFIX, '');
+
+        // temporary fix for jsDelivr's unexpected 403 responses
+        mocFile = mocFile.replace('@master', '');
 
         mocFile = decodeURI(mocFile);
 
