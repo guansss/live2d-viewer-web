@@ -64,7 +64,7 @@ export default Vue.extend({
             this.$emit('input', id);
         },
         remove(id: number) {
-            if (this.models.length === 0) {
+            if (this.models.length === 1) {
                 this.$emit('input', 0);
             }
 
