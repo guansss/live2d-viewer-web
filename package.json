@@ -20,7 +20,7 @@
     "jszip": "^3.5.0",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.1",
-    "pixi-live2d-display": "^0.3.0-beta.2",
+    "pixi-live2d-display": "^0.3.1",
     "pixi.js": "^5.3.6",
     "stats.js": "^0.17.0",
     "vue": "^2.6.12",

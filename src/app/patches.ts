@@ -7,7 +7,6 @@ import {
     InternalModel,
     Live2DFactory,
     Live2DFactoryContext,
-    urlToJSON as defaultURLToJSON,
 } from 'pixi-live2d-display';
 import JSON5 from 'json5';
 import { ping } from '@/utils';
@@ -19,7 +18,7 @@ import { CommonModelJSON } from '@/global';
 import { isMocFile, isMocFileV3 } from './helpers';
 
 // replace the default urlToJSON middleware
-Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(defaultURLToJSON), 1, urlToJSON);
+Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(Live2DFactory.urlToJSON), 1, urlToJSON);
 
 const defaultInit = (InternalModel.prototype as any).init as () => void;
 
