@@ -1,6 +1,8 @@
 import { CommonModelJSON } from '@/global';
 import { isMocFile, isSettingsFile } from './helpers';
 
+declare const __SOURCE_REPOSITORIES__:string[];
+
 export interface TreeNode {
     id: number;
     name: string;
@@ -14,12 +16,12 @@ const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/';
 
 const tasks = new Map<TreeNode, Promise<void>>();
 
-const rootNodes: TreeNode[] = [{
+const rootNodes: TreeNode[] = __SOURCE_REPOSITORIES__.map(repo=>({
     id: uid++,
-    name: 'Eikanya/Live2d-model',
+    name: repo,
     children: [],
     files: [],
-}];
+}));
 
 const settingsJSONs: Record<string, CommonModelJSON> = {};
 
@@ -122,7 +124,7 @@ export function validateURL(url: string): string | undefined {
             return;
         }
 
-        return 'Error: Cannot display a moc file that doesn\'t belong to any resource repository';
+        return 'Error: Cannot display a moc file that doesn\'t belong to any source repository';
     }
 
     return 'Warning: Unknown URL type. The model may not be loaded correctly';

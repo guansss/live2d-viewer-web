@@ -1,48 +1,15 @@
 const fs = require('fs');
 const pathModule = require('path').posix;
+const { repos, folderBlacklist, fileBlacklist, mocWhitelist } = require('./const');
 
 console.time();
 
-const repos = [
-    'Eikanya/Live2d-model',
-    // 'xiaoski/live2d_models_collection',
-];
+const inputFolder = pathModule.resolve(__dirname, './')
+const outputFolder = pathModule.resolve(__dirname, './')
 
 function normalize(repo) {
     return repo.toLowerCase().replace(/\//g, '');
 }
-
-const folderBlacklist = [
-    // mature models... _(:ι」∠)_
-    'UnHolY ToRturEr',
-    'LOVE³-LOVE CUBE-',
-    '[200228] [North Box] モノノ系彼女',
-    '[200229][同人ゲーム][マメック星] 雑貨屋さんの若女将 [RJ279692]',
-    '[200328][虚夢浮遊物体] ソムニア掌編―薔薇色― [RJ282471]',
-    '[200502][らぷらす] プリンセスハーレム [RJ280657]',
-    '[MountBatten] Live2Dで動くイソップ寓話',
-    '[ぬぷ竜の里] ルインズシーカー live2d',
-    '[めがみそふと] 【Live2D】コン狐との日常+(ぷらす)',
-    'カスタムcute ～俺と彼女の育成バトル！～',
-    '異世界で俺はエロ経営のトップになる！',
-    '神楽黎明記～Live2d',
-];
-
-const mocWhitelist = [
-    // these moc files are already specified in respective settings files
-    "Sacred Sword princesses/boss_cg_live2d_h004/res/iderhelamodel.moc",
-    "Sacred Sword princesses/char_cg_live2d_007/res/dorlamodel.moc",
-    "Sacred Sword princesses/char_cg_live2d_049/res/airmanirmodel.moc",
-    "Sacred Sword princesses/char_cg_live2d_h048/res/ainir.moc",
-];
-
-const fileBlacklist = [
-    // broken file
-    "Sacred Sword princesses/model.json",
-
-    // non-model zip
-    '少女咖啡枪 girls cafe gun/UnityLive2DExtractor+for+ガール・カフェ・ガン.zip',
-];
 
 const settingsJSONs = {};
 
@@ -52,7 +19,20 @@ let jsons = 0;
 
 function main() {
     for (const repo of repos) {
-        const json = require('./' + normalize(repo) + '-tree.json');
+        console.log('>', repo)
+
+        const inputFile = pathModule.resolve(inputFolder, normalize(repo) + '-tree.json')
+
+        if (!fs.existsSync(inputFile)) {
+            console.warn('Cannot find file', inputFile, ', skipping')
+            continue
+        }
+
+        processed = 0;
+        added = 0;
+        jsons = 0;
+
+        const json = require(inputFile);
 
         json.path = repo;
 
@@ -60,10 +40,12 @@ function main() {
 
         const content = JSON.stringify({
             models: json,
-            settings: settingsJSONs,
+            settings: Object.keys(settingsJSONs).length ? settingsJSONs : undefined,
         }, null, 2);
 
-        fs.writeFileSync(normalize(repo) + '.json', content, 'utf8');
+        const outputFile = pathModule.resolve(outputFolder, normalize(repo) + '.json')
+
+        fs.writeFileSync(outputFile, content, 'utf8');
     }
 }
 
@@ -77,37 +59,50 @@ function processTree(tree, fullPath) {
 
     fullPath = pathModule.join(fullPath, tree.path);
 
-    mainLoop: for (const node of tree.tree) {
+    for (const node of tree.tree) {
         processed++;
 
-        if (typeof node === 'string') {
-            for (const folder of folderBlacklist) {
-                if (node.includes(folder)) {
-                    continue mainLoop;
-                }
-            }
+        if (typeof node === 'string') { // the node is a file (leaf)
+            const isBlacklisted = folderBlacklist.some(folder => node.includes(folder))
 
-            if (processFile(node, tree.tree, fullPath)) {
+            if (!isBlacklisted && processFile(node, tree.tree, fullPath)) {
                 files.push(node);
 
                 added++;
                 process.stdout.write('\rProcessed: ' + processed + '  Added: ' + added + '  JSONs: ' + jsons);
             }
-        } else {
+        } else { // the node is a tree
             if (processTree(node, fullPath)) {
                 children.push(node);
             }
         }
     }
 
-    const { directFiles, subTrees } = groupByDir(files, 0);
+    // exclude empty folder
+    if (!(children.length || files.length)) {
+        return false
+    }
+
+    const { directFiles, subtrees } = groupByDir(files);
 
     tree.name = tree.path;
     tree.files = directFiles;
-    tree.children = children.concat(subTrees);
+    tree.children = children.concat(subtrees);
 
     delete tree.path;
     delete tree.tree;
+
+    // join the folder with subfolder if it's the only child
+    if (tree.children.length === 1 && tree.files.length === 0) {
+        // but don't do this to the root node!
+        if (fullPath !== tree.name) {
+            const thisName = tree.name
+
+            Object.assign(tree, tree.children[0])
+
+            tree.name = pathModule.join(thisName, tree.name)
+        }
+    }
 
     return true;
 }
@@ -170,7 +165,7 @@ function processFile(file, siblings, fullPath) {
 
 function groupByDir(files) {
     const directFiles = [];
-    const subTrees = [];
+    const subtrees = [];
 
     for (let i = 0; i < files.length; i++) {
         const path = files[i];
@@ -183,11 +178,11 @@ function groupByDir(files) {
             if (exactSiblings.length > 1) {
                 const files1 = exactSiblings.map(path => path.slice(slashNextIndex));
 
-                const { directFiles: _directFiles, subTrees: _subTrees } = groupByDir(files1);
+                const { directFiles: _directFiles, subtrees: _subtrees } = groupByDir(files1);
 
-                subTrees.push({
+                subtrees.push({
                     name: dir.slice(0, -1),
-                    children: _subTrees.length ? _subTrees : undefined,
+                    children: _subtrees.length ? _subtrees : undefined,
                     files: _directFiles.length ? _directFiles : undefined,
                 });
 
@@ -200,7 +195,7 @@ function groupByDir(files) {
         }
     }
 
-    return { directFiles, subTrees };
+    return { directFiles, subtrees };
 }
 
 main();

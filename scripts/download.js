@@ -1,10 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 const fetch = require('node-fetch');
+const { repos } = require('./const');
 
-const repos = [
-    'Eikanya/Live2d-model',
-    // 'xiaoski/live2d_models_collection',
-];
+const cacheFolder = path.resolve(__dirname, 'cache')
+const outputFolder = path.resolve(__dirname, './')
 
 function normalize(repo) {
     return repo.toLowerCase().replace(/\//g, '');
@@ -15,7 +15,9 @@ const tasks = repos.map(async repo => {
         url: `https://api.github.com/repos/${repo}/git/trees/master`,
     }, true);
 
-    fs.writeFileSync(normalize(repo) + '-tree.json', JSON.stringify(tree), 'utf8');
+    const outputFile = path.resolve(outputFolder, normalize(repo) + '-tree.json')
+
+    fs.writeFileSync(outputFile, JSON.stringify(tree), 'utf8');
 });
 
 async function fetchTree(tree, skipRecursive) {
@@ -62,7 +64,8 @@ async function fetchTree(tree, skipRecursive) {
 async function fetchJSON(url) {
     console.log('fetch', url);
 
-    const file = 'cache/' + normalize(url.slice('https://api.github.com/repos/'.length).replace('?recursive=true', '-rec')) + '.json';
+    const fileName = normalize(url.slice('https://api.github.com/repos/'.length).replace('?recursive=true', '-rec')) + '.json';
+    const file = path.resolve(cacheFolder, fileName);
 
     if (fs.existsSync(file)) {
         console.log('Read cache', file);
@@ -75,10 +78,15 @@ async function fetchJSON(url) {
     const data = await fetch(url).then(res => res.json());
 
     if (data.message) {
-        throw  new Error(data.message);
+        throw new Error(data.message);
     }
 
     console.log('Write cache', file);
+
+    if (!fs.existsSync(cacheFolder)) {
+        fs.mkdirSync(cacheFolder);
+    }
+
     fs.writeFileSync(file, JSON.stringify(data), 'utf8');
 
     return data;

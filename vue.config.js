@@ -21,6 +21,7 @@ module.exports = {
         config
             .plugin('define')
             .tap(args => {
+                args[0].__SOURCE_REPOSITORIES__ = JSON.stringify(require('./scripts/const').repos);
                 args[0].__BUILD_TIME__ = Date.now();
 
                 return args;
