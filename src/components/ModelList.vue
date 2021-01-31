@@ -2,12 +2,12 @@
   <v-slide-y-reverse-transition>
     <v-sheet v-if="show&&models.length" class="model-list" width="100%">
       <v-item-group mandatory class="flex-grow-1" :value="selectedIndex" @change="select">
-        <transition-group class="model-group d-flex pa-2" name="move">
+        <transition-group class="model-group d-flex pa-1 pa-xl-2" name="move">
           <v-item v-for="(model,i) in models" :key="model.id" v-slot="{ active, toggle }">
-            <v-card :color="model.error?'#631f1f':active?'grey darken-2':'grey darken-3'" class="ma-2" @click="toggle">
+            <v-card :color="model.error?'#631f1f':active?'grey darken-2':'grey darken-3'" class="ma-1 ma-xl-2" @click="toggle">
               <v-tooltip top :disabled="!model.error">
                 <template v-slot:activator="{ on, attrs }">
-                  <v-img :src="model.thumbnail" :width="model.error?192:model.aspectRatio*192" height="192"
+                  <v-img :src="model.thumbnail" :width="model.error?paneHeight:model.aspectRatio*paneHeight" :height="paneHeight"
                          v-bind="attrs" v-on="on">
                     <template v-slot:placeholder>
                       <v-row class="fill-height ma-0" align="center" justify="center">
@@ -17,7 +17,7 @@
                       </v-row>
                     </template>
 
-                    <v-card-title class="ml-1 pa-0 flex-nowrap subtitle-1">
+                    <v-card-title class="ml-1 pa-0 flex-nowrap text-subtitle-2 text-xl-subtitle-1">
                       <span class="model-item-title text-truncate">{{ '#' + model.id + ' ' + model.name }}</span>
                       <v-spacer></v-spacer>
                       <v-btn icon v-if="active" @click.stop="remove(model.id)"><v-icon size="20">mdi-close</v-icon>
@@ -50,6 +50,9 @@ export default Vue.extend({
         models: [] as ModelEntity[],
     }),
     computed: {
+        paneHeight() {
+            return this.$vuetify.breakpoint.xl ? 192 : 144;
+        },
         selectedIndex() {
             return this.models.findIndex(model => model.id === this.value);
         },
