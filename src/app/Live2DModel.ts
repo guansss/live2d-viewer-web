@@ -60,9 +60,9 @@ export class Live2DModel extends BaseLive2DModel {
         const expressionManager = this.internalModel.motionManager.expressionManager;
 
         if (expressionManager) {
-            const originalStartMotion = (expressionManager as any).startMotion;
+            const originalStartMotion = (expressionManager as any)._setExpression;
 
-            (expressionManager as any).startMotion = (expression: any) => {
+            (expressionManager as any)._setExpression = (expression: any) => {
                 originalStartMotion.call(expressionManager, expression);
 
                 this.emit('expressionSet', expressionManager.expressions.indexOf(expression));
