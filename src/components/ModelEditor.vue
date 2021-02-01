@@ -1,6 +1,6 @@
 <template>
   <div class="model-editor" v-if="model">
-    <v-list expand>
+    <v-list expand v-if="hasPixiModel">
       <v-list-group :value="true">
         <template v-slot:activator>
           <v-list-item-content>
@@ -89,6 +89,7 @@
                     :value="filter"></v-checkbox>
       </v-list-group>
     </v-list>
+    <pre v-else class="pa-3 text--secondary">{{ model.loadingState.text }}</pre>
   </div>
 </template>
 
@@ -139,7 +140,10 @@ export default Vue.extend({
         filters: Object.keys(Filter.filters),
     }),
     computed: {
-        rotationDeg() {
+        hasPixiModel(): boolean {
+            return !!this.motionState;
+        },
+        rotationDeg(): string {
             return Math.round((this.model?.rotation || 0) / Math.PI * 180) + '°';
         },
     },

@@ -1,4 +1,4 @@
-import { Live2DModel as BaseLive2DModel } from 'pixi-live2d-display';
+import { Live2DFactoryContext, Live2DModel as BaseLive2DModel } from 'pixi-live2d-display';
 import { HitAreaFrames } from 'pixi-live2d-display/src/tools/HitAreaFrames';
 import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
@@ -10,6 +10,8 @@ import { Filter } from '@/app/Filter';
 BaseLive2DModel.registerTicker(Ticker);
 
 export class Live2DModel extends BaseLive2DModel {
+    factoryContext!: Live2DFactoryContext;
+
     hitAreaFrames: HitAreaFrames;
     background: Sprite;
 
@@ -125,7 +127,7 @@ export class Live2DModel extends BaseLive2DModel {
         super._render(renderer);
     }
 
-    destroy(options?: { children?: boolean; texture?: boolean; baseTexture?: boolean }) {
+    destroy(options?: { children?: boolean; texture?: boolean; baseTexture?: boolean; }) {
         super.destroy(options);
 
         Filter.release(this);

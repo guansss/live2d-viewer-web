@@ -4,6 +4,8 @@ import { draggable } from '@/tools/dragging';
 import { settings } from '@pixi/settings';
 import { Renderer } from '@pixi/core';
 import { Filter } from '@/app/Filter';
+import { ModelLoadingState } from './ModelLoadingState';
+import { Live2DFactory } from 'pixi-live2d-display';
 
 // 1x1 green image
 const THUMBNAIL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMU22h6EgADqAHHuWdgTgAAAABJRU5ErkJggg==';
@@ -27,6 +29,8 @@ export class ModelEntity extends EventEmitter {
 
     filters: (keyof typeof Filter.filters)[] = [];
 
+    loadingState = new ModelLoadingState();
+
     error = '';
 
     pixiModel?: Live2DModel;
@@ -44,21 +48,27 @@ export class ModelEntity extends EventEmitter {
             this.url = '(Local files)';
         }
 
+        // don't use Live2DModel.fromSync() because when loading from local files,
+        // the "settingsJSONLoaded" and "settingsLoaded" events will be emitted before
+        // we're able to listen to the Live2DModel instance
+        // TODO: (plugin) improve model creation?
+        const pixiModel = new Live2DModel();
+
+        this.loadingState.watch(pixiModel);
+
         try {
-            this.pixiModel = await Live2DModel.from(source);
+            await Live2DFactory.setupLive2DModel(pixiModel, source);
         } catch (e) {
             console.warn(e);
 
             this.error = e instanceof Error ? e.message : e + '';
         }
 
-        if (this.pixiModel) {
-            this.initModel(this.pixiModel);
-            this.emit('modelLoaded', this.pixiModel);
-        }
+        this.modelLoaded(pixiModel);
+        this.emit('modelLoaded', pixiModel);
     }
 
-    initModel(pixiModel: Live2DModel) {
+    modelLoaded(pixiModel: Live2DModel) {
         this.pixiModel = pixiModel;
         this.name = pixiModel.internalModel.settings.name;
         this.thumbnail = THUMBNAIL;
