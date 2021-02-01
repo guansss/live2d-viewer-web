@@ -7,6 +7,7 @@ import {
     InternalModel,
     Live2DFactory,
     Live2DFactoryContext,
+    folderName,
 } from 'pixi-live2d-display';
 import JSON5 from 'json5';
 import { ping } from '@/utils';
@@ -22,7 +23,7 @@ Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares
 
 const defaultInit = (InternalModel.prototype as any).init as () => void;
 
-(InternalModel.prototype as any).init = async function() {
+(InternalModel.prototype as any).init = async function () {
     await patchInternalModel(this);
     defaultInit.call(this);
 };
@@ -151,6 +152,11 @@ const patches: {
     async patch(json: Partial<Cubism2Spec.ModelJSON>, url: string) {
         extractCubism2IdleMotions(json, ['daiji']);
 
+        if (!json.name) {
+            // set a proper name
+            json.name = folderName(url.replace(/(normal|destroy).model.json/, ''));
+        }
+
         // prefix paths of motion files
         if (json.motions?.idle?.length) {
             // only check and fix the first one
@@ -273,6 +279,11 @@ const patches: {
 
     patch(json: Partial<Cubism2Spec.ModelJSON>) {
         removeSoundDefs(json);
+
+        // no empty name
+        if (json.name === '') {
+            delete json.name;
+        }
     },
 }, {
     search: '战舰少女', // 战舰少女 Warship Girls
@@ -285,6 +296,15 @@ const patches: {
 
     patch(json: Partial<Cubism2Spec.ModelJSON>) {
         removeSoundDefs(json);
+    },
+}, {
+    search: '诺亚幻想', // 诺亚幻想 Noah Fantasy
+
+    patch(json: Partial<Cubism2Spec.ModelJSON>) {
+        // just... don't name it "model"
+        if (json.name === 'model') {
+            delete json.name;
+        }
     },
 }];
 
