@@ -15,7 +15,7 @@ FileLoader.createSettings = async (files: File[]) => {
     return defaultCreateSettings(files);
 };
 
-export async function uploadedFiles(files: File[]): Promise<ModelSettings[]> {
+export async function uploadFiles(files: File[]): Promise<ModelSettings[]> {
     if (files.length === 1 && files[0].name.endsWith('.zip')) {
         // just let it go...
         return [];

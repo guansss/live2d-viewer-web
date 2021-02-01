@@ -26,6 +26,10 @@ export class ModelLoadingState {
 
     text = '';
 
+    constructor() {
+        this.updateText();
+    }
+
     watch(model: Live2DModel) {
         model
             .once('settingsJSONLoaded', () => this.complete('settingsJSON', model))

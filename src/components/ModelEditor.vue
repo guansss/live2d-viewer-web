@@ -89,7 +89,10 @@
                     :value="filter"></v-checkbox>
       </v-list-group>
     </v-list>
-    <pre v-else class="pa-3 text--secondary">{{ model.loadingState.text }}</pre>
+    <template v-else>
+      <pre class="pa-3 text--secondary">{{ model.loadingState.text }}</pre>
+      <pre v-if="model.error" class="error--text px-3 text-wrap">{{ model.error }}</pre>
+    </template>
   </div>
 </template>
 

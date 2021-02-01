@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { uploadedFiles } from '@/app/upload';
+import { uploadFiles } from '@/app/upload';
 import { isDraggingFile, readFiles } from '@/utils/file';
 import { ExtendedFileList } from 'pixi-live2d-display';
 import { Background } from '@/tools/Background';
@@ -42,7 +42,7 @@ export default Vue.extend({
         },
         async uploadModel(files: File[]) {
             try {
-                const settingsArray = await uploadedFiles(files);
+                const settingsArray = await uploadFiles(files);
 
                 if (settingsArray.length) {
                     for (const settings of settingsArray) {
