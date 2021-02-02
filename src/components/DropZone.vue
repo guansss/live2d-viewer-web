@@ -44,17 +44,21 @@ export default Vue.extend({
             try {
                 const settingsArray = await uploadFiles(files);
 
+                let id: number;
+
                 if (settingsArray.length) {
                     for (const settings of settingsArray) {
-                        const fileList = files as ExtendedFileList;
+                        const fileList = files.slice() as ExtendedFileList;
 
                         fileList.settings = settings;
 
-                        App.addModel(fileList);
+                        id = App.addModel(fileList);
                     }
                 } else {
-                    App.addModel(files);
+                    id = App.addModel(files);
                 }
+
+                this.$emit('create', id!);
             } catch (e) {
                 e.message = 'Failed to load model: ' + e.message;
 

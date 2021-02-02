@@ -56,7 +56,7 @@
       </v-btn>
     </v-fab-transition>
 
-    <DropZone @error="error"/>
+    <DropZone @create="selectedModelID=$event" @error="error"/>
 
     <v-snackbar v-model="snackbar.visible" :timeout="snackbar.timeout">
       {{ snackbar.message }}
