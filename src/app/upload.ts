@@ -1,3 +1,4 @@
+import { basename } from '@/utils/file';
 import { Cubism2ModelSettings, Cubism4ModelSettings, FileLoader, ModelSettings } from 'pixi-live2d-display';
 import { isMocFile, isMocFileV2, isSettingsFile } from './helpers';
 
@@ -87,6 +88,7 @@ function createFakeSettings(files: File[]): ModelSettings {
     }
 
     const mocFile = mocFiles[0].webkitRelativePath;
+    const modelName = basename(mocFile).replace(/\.moc3?/, '');
 
     const filePaths = files.map(file => file.webkitRelativePath);
 
@@ -100,14 +102,11 @@ function createFakeSettings(files: File[]): ModelSettings {
     const physics = filePaths.find(f => f.includes('physics'));
     const pose = filePaths.find(f => f.includes('pose'));
 
-    let fakeSettingsFile = 'dummy' + (uid++);
     let settings: ModelSettings;
 
     if (isMocFileV2(mocFile)) {
-        fakeSettingsFile += '.model.json';
-
         settings = new Cubism2ModelSettings({
-            url: fakeSettingsFile,
+            url: modelName + '.model.json',
             textures, pose, physics,
             model: mocFile,
             motions: motions.length
@@ -117,10 +116,8 @@ function createFakeSettings(files: File[]): ModelSettings {
                 : undefined,
         });
     } else {
-        fakeSettingsFile += '.model3.json';
-
         settings = new Cubism4ModelSettings({
-            url: fakeSettingsFile,
+            url: modelName + '.model3.json',
             Version: 3,
             FileReferences: {
                 Moc: mocFile,
@@ -136,7 +133,10 @@ function createFakeSettings(files: File[]): ModelSettings {
         });
     }
 
-    (settings as any)._objectURL = 'DontTouchMe://' + fakeSettingsFile;
+    settings.name = modelName;
+
+    // provide this property for FileLoader
+    (settings as any)._objectURL = 'DontTouchMe://' + settings.url;
 
     return settings;
 }

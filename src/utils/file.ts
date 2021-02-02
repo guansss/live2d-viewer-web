@@ -1,6 +1,6 @@
 declare global {
     interface DataTransferItem {
-        webkitGetAsEntry(): FileSystemEntry
+        webkitGetAsEntry(): FileSystemEntry;
     }
 
     interface FileSystemEntry {
@@ -14,12 +14,17 @@ declare global {
     }
 
     interface FileSystemFileEntry extends FileSystemEntry {
-        file(succeed: (file: File) => void, fail: (e: Error) => void): void
+        file(succeed: (file: File) => void, fail: (e: Error) => void): void;
     }
 
     interface FileSystemDirectoryReader {
-        readEntries(succeed: (entries: FileSystemEntry[]) => void, fail: (e: Error) => void): void
+        readEntries(succeed: (entries: FileSystemEntry[]) => void, fail: (e: Error) => void): void;
     }
+}
+
+export function basename(path: string): string {
+    // https://stackoverflow.com/a/15270931
+    return path.split(/[\\/]/).pop()!;
 }
 
 /**
