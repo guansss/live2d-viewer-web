@@ -1,13 +1,15 @@
 import { CommonModelJSON } from '@/global';
 import { isMocFile, isSettingsFile } from './helpers';
 
-declare const __SOURCE_REPOSITORIES__:string[];
+declare const __SOURCE_REPOSITORIES__: string[];
 
 export interface TreeNode {
     id: number;
     name: string;
     children?: TreeNode[];
     files?: string[];
+    error?: any;
+    modelCount: number;
 }
 
 let uid = 0;
@@ -16,11 +18,12 @@ const JSDELIVR_PREFIX = 'https://cdn.jsdelivr.net/gh/';
 
 const tasks = new Map<TreeNode, Promise<void>>();
 
-const rootNodes: TreeNode[] = __SOURCE_REPOSITORIES__.map(repo=>({
+const rootNodes: TreeNode[] = __SOURCE_REPOSITORIES__.map(repo => ({
     id: uid++,
     name: repo,
     children: [],
     files: [],
+    modelCount: 0,
 }));
 
 const settingsJSONs: Record<string, CommonModelJSON> = {};
@@ -46,9 +49,11 @@ export function loadRootNode(node: TreeNode): Promise<void> {
                 node.files = data.models.files;
 
                 traverseNode(node, n => n.id = uid++);
+                countModels(node);
 
                 Object.assign(settingsJSONs, data.settings);
-            });
+            })
+            .catch(e => node.error = e);
 
         tasks.set(node, task);
 
@@ -56,6 +61,16 @@ export function loadRootNode(node: TreeNode): Promise<void> {
     }
 
     return tasks.get(node)!;
+}
+
+function countModels(node: TreeNode): number {
+    node.modelCount = node.files?.length || 0;
+
+    for (const child of node.children || []) {
+        node.modelCount += countModels(child);
+    }
+
+    return node.modelCount;
 }
 
 export function traverseNode(node: TreeNode, fn: (node: TreeNode) => void) {

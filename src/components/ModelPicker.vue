@@ -11,42 +11,41 @@
 
       <v-row no-gutters class="content-row flex-grow-1">
         <v-col class="content-col">
-          <v-card-text>
-            <v-treeview activatable return-object :load-children="fetchModels" :active="activeFolders" :items="tree"
-                        item-key="id" open-on-click @update:active="$event.length&&(activeFolders=$event)"
-                        @update:open="folderOpened">
-              <template v-slot:prepend="{ open }">
-                <v-icon>
-                  {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
-                </v-icon>
-              </template>
-            </v-treeview>
-          </v-card-text>
+          <v-treeview activatable return-object :load-children="fetchModels" :active="activeFolders" :items="tree"
+                      item-key="id" open-on-click @update:active="$event.length&&(activeFolders=$event)"
+                      @update:open="folderOpened">
+            <template v-slot:prepend="{ open }">
+              <v-icon>
+                {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
+              </v-icon>
+            </template>
+            <template v-slot:label="{ item }">
+                <span :class="{'text-decoration-line-through':item.error}">{{ item.name }}</span>
+                <v-chip x-small class="model-count ml-1 px-2 text--secondary">{{ item.modelCount }}</v-chip>
+            </template>
+          </v-treeview>
         </v-col>
 
         <v-divider vertical></v-divider>
 
         <v-col class="content-col">
-          <v-card-text>
-            <v-list-item-group v-model="selectedFileIndex">
-              <v-list-item v-for="(file,i) in activeFolderFiles" :key="file" color="primary"
-                           @dblclick.native="selectedFileIndex=i;submit()">
-                <v-list-item-content>
-                  <v-list-item-title>{{ file }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-item-group>
-          </v-card-text>
+          <v-list-item-group v-model="selectedFileIndex">
+            <v-list-item v-for="(file,i) in activeFolderFiles" :key="file" color="primary"
+                         @dblclick.native="selectedFileIndex=i;submit()">
+              <v-list-item-content>
+                <v-list-item-title>{{ file }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
         </v-col>
       </v-row>
 
       <v-divider></v-divider>
 
       <v-card-actions>
-        <span class="text--secondary">The listed models were scraped from <a target="_blank"
+        <span class="text--secondary text-caption">The listed models were scraped from <a target="_blank"
                                                                              href="https://github.com/Eikanya/Live2d-model">Eikanya/Live2d-model</a>.
           All credit goes to their respective creators.</span>
-        <v-alert dense text type="error" v-visible="alert" class="mb-0">{{ alert }}</v-alert>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -95,11 +94,6 @@ export default Vue.extend({
     methods: {
         async fetchModels(node: TreeNode) {
             await loadRootNode(node);
-
-            if (node.files?.length && !node.children?.length) {
-                // the children must not be empty, or TreeView won't recognize it as a open-able folder
-                node.children = [{ id: Math.random(), name: '' }];
-            }
         },
         folderOpened(openedFolders: TreeNode[]) {
             const diff = xor(openedFolders, this.openedFolders);
@@ -136,4 +130,8 @@ export default Vue.extend({
 .content-col
   height 100%
   overflow auto
+
+.model-count
+  vertical-align text-top
+  pointer-events none
 </style>
