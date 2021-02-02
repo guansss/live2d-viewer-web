@@ -7,6 +7,8 @@ import {
     InternalModel,
     Live2DFactory,
     Live2DFactoryContext,
+    Live2DLoader,
+    XHRLoader,
     folderName,
 } from 'pixi-live2d-display';
 import JSON5 from 'json5';
@@ -14,12 +16,34 @@ import { ping } from '@/utils';
 import unionBy from 'lodash/unionBy';
 import snakeCase from 'lodash/snakeCase';
 import { url as urlUtils } from '@pixi/utils';
-import { getSettingsJSON } from './data';
+import { getAlternativeURL, getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';
 import { isMocFile, isMocFileV3 } from './helpers';
 
+// replace the XHRLoader to handle failures
+Live2DLoader.middlewares[Live2DLoader.middlewares.indexOf(XHRLoader.loader)] = async (context, next) => {
+    const url = context.settings ? context.settings.resolveURL(context.url) : context.url;
+
+    try {
+        await XHRLoader.loader(context, next);
+        return;
+    } catch (e) {
+        if (!(e.status === 403 && url.includes('jsdelivr'))) {
+            throw e;
+        }
+
+        console.warn('Received 403 response from jsDelivr, switching to the alternative URL');
+    }
+
+    context.url = getAlternativeURL(url);
+
+    await XHRLoader.loader(context, next);
+
+    return next();
+};
+
 // replace the default urlToJSON middleware
-Live2DFactory.live2DModelMiddlewares.splice(Live2DFactory.live2DModelMiddlewares.indexOf(Live2DFactory.urlToJSON), 1, urlToJSON);
+Live2DFactory.live2DModelMiddlewares[Live2DFactory.live2DModelMiddlewares.indexOf(Live2DFactory.urlToJSON)] = urlToJSON;
 
 const defaultInit = (InternalModel.prototype as any).init as () => void;
 

@@ -89,18 +89,17 @@ export function getFileURL(folder: TreeNode, file: string): string | undefined {
     if (folderPath) {
         let filePath = encodeURI(folderPath + '/' + file);
 
-        // temporary fix for jsDelivr's unexpected 403 responses
-        const secondSlashIndex = filePath.indexOf('/', filePath.indexOf('/') + 1);
-        filePath = filePath.slice(0, secondSlashIndex) + '@master' + filePath.slice(secondSlashIndex);
-
         return JSDELIVR_PREFIX + filePath;
     }
 }
 
+/**
+ * Converts the jsDelivr URL to GitHub's raw URL.
+ * 
+ * - `https://cdn.jsdelivr.net/gh/<repo>/<file>`
+ * - `https://raw.githubusercontent.com/<repo>/master/<file>`
+ */
 export function getAlternativeURL(url: string): string {
-    // raw: "https://cdn.jsdelivr.net/gh/<repo>/<file>"
-    // alt: "https://raw.githubusercontent.com/<repo>/master/<file>"
-
     const repoAndFile = url.replace(JSDELIVR_PREFIX, '');
     const names = repoAndFile.split('/');
     const repo = names.slice(0, 2).join('/');
@@ -148,9 +147,6 @@ export function validateURL(url: string): string | undefined {
 export function getSettingsJSON(mocURL: string): CommonModelJSON | undefined {
     if (mocURL.startsWith(JSDELIVR_PREFIX)) {
         let mocFile = mocURL.replace(JSDELIVR_PREFIX, '');
-
-        // temporary fix for jsDelivr's unexpected 403 responses
-        mocFile = mocFile.replace('@master', '');
 
         mocFile = decodeURI(mocFile);
 
