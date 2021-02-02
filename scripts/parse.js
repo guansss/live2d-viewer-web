@@ -199,20 +199,21 @@ function groupByDir(files) {
 
 function joinDirs(node, isNotRoot = false) {
     // join the dir with subdir if it's the only child
-    if ((node.children && node.children.length === 1) && (!node.files || node.files.length === 0)) {
-        // but don't do this to the root node!
-        if (isNotRoot) {
-            const thisName = node.name;
+    if (
+        isNotRoot
+        && (node.children && node.children.length === 1)
+        && (!node.files || node.files.length === 0)
+    ) {
+        const thisName = node.name;
 
-            process.stdout.write('\nJoin dir: ' + node.name + '/' + node.children[0].name);
+        process.stdout.write('\nJoin dir: ' + node.name + '/' + node.children[0].name);
 
-            Object.assign(node, node.children[0]);
+        Object.assign(node, node.children[0]);
 
-            node.name = pathModule.join(thisName, node.name);
+        node.name = pathModule.join(thisName, node.name);
 
-            // do it again since this node has been overwritten
-            joinDirs(node, true);
-        }
+        // do it again since this node has been overwritten
+        joinDirs(node, true);
     } else {
         if (node.children) {
             for (const child of node.children) {
