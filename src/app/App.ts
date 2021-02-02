@@ -16,7 +16,7 @@ export class App {
     static pixiApp = new PixiApp(stats);
 
     private static _volume = SoundManager.volume;
-    private static _showHitAreaFrames = true;
+    private static _showHitAreaFrames = false;
     private static _showModelFrame = false;
     private static _showStats = true;
 

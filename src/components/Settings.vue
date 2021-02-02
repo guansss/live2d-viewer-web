@@ -23,7 +23,7 @@
     <v-divider></v-divider>
     <div class="pt-4 d-flex align-center">
       <v-icon class="mr-2">mdi-github</v-icon>
-      <span>View source on <a href="https://github.com/guansss/live2d-viewer-web"
+      <span>View source or report bugs on <a href="https://github.com/guansss/live2d-viewer-web"
                               class="text-decoration-none">GitHub</a></span></div>
 
     <span class="pt-4 body-2 text--secondary">Last built: {{ lastUpdated }}</span>
