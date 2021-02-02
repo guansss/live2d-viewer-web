@@ -4,46 +4,57 @@ const { repos, folderBlacklist, fileBlacklist, mocWhitelist } = require('./const
 
 console.time();
 
-const inputFolder = pathModule.resolve(__dirname, './')
-const outputFolder = pathModule.resolve(__dirname, './')
+const inputFolder = pathModule.resolve(__dirname, './');
+const outputFolder = pathModule.resolve(__dirname, '../public');
 
 function normalize(repo) {
     return repo.toLowerCase().replace(/\//g, '');
 }
 
-const settingsJSONs = {};
-
 let processed = 0;
 let added = 0;
 let jsons = 0;
+let settingsJSONs = {};
 
 function main() {
     for (const repo of repos) {
-        console.log('>', repo)
+        console.log('\n>', repo);
 
-        const inputFile = pathModule.resolve(inputFolder, normalize(repo) + '-tree.json')
+        const inputFile = pathModule.resolve(inputFolder, normalize(repo) + '-tree.json');
 
         if (!fs.existsSync(inputFile)) {
-            console.warn('Cannot find file', inputFile, ', skipping')
-            continue
+            console.warn('Cannot find file', inputFile, ', skipping');
+            continue;
         }
 
         processed = 0;
         added = 0;
         jsons = 0;
+        settingsJSONs = {};
 
         const json = require(inputFile);
 
         json.path = repo;
 
         processTree(json, '');
+        joinDirs(json);
+
+        // strip empty arrays
+        traverse(json, node => {
+            if (!node.files.length) {
+                delete node.files;
+            }
+            if (!node.children.length) {
+                delete node.children;
+            }
+        });
 
         const content = JSON.stringify({
             models: json,
             settings: Object.keys(settingsJSONs).length ? settingsJSONs : undefined,
         }, null, 2);
 
-        const outputFile = pathModule.resolve(outputFolder, normalize(repo) + '.json')
+        const outputFile = pathModule.resolve(outputFolder, normalize(repo) + '.json');
 
         fs.writeFileSync(outputFile, content, 'utf8');
     }
@@ -63,7 +74,7 @@ function processTree(tree, fullPath) {
         processed++;
 
         if (typeof node === 'string') { // the node is a file (leaf)
-            const isBlacklisted = folderBlacklist.some(folder => node.includes(folder))
+            const isBlacklisted = folderBlacklist.some(folder => node.includes(folder));
 
             if (!isBlacklisted && processFile(node, tree.tree, fullPath)) {
                 files.push(node);
@@ -80,7 +91,7 @@ function processTree(tree, fullPath) {
 
     // exclude empty folder
     if (!(children.length || files.length)) {
-        return false
+        return false;
     }
 
     const { directFiles, subtrees } = groupByDir(files);
@@ -91,18 +102,6 @@ function processTree(tree, fullPath) {
 
     delete tree.path;
     delete tree.tree;
-
-    // join the folder with subfolder if it's the only child
-    if (tree.children.length === 1 && tree.files.length === 0) {
-        // but don't do this to the root node!
-        if (fullPath !== tree.name) {
-            const thisName = tree.name
-
-            Object.assign(tree, tree.children[0])
-
-            tree.name = pathModule.join(thisName, tree.name)
-        }
-    }
 
     return true;
 }
@@ -176,14 +175,14 @@ function groupByDir(files) {
             const exactSiblings = files.filter(path => path.startsWith(dir));
 
             if (exactSiblings.length > 1) {
-                const files1 = exactSiblings.map(path => path.slice(slashNextIndex));
+                const subfiles = exactSiblings.map(path => path.slice(slashNextIndex));
 
-                const { directFiles: _directFiles, subtrees: _subtrees } = groupByDir(files1);
+                const { directFiles: _directFiles, subtrees: _subtrees } = groupByDir(subfiles);
 
                 subtrees.push({
                     name: dir.slice(0, -1),
-                    children: _subtrees.length ? _subtrees : undefined,
-                    files: _directFiles.length ? _directFiles : undefined,
+                    children: _subtrees,
+                    files: _directFiles,
                 });
 
                 i += exactSiblings.length - 1;
@@ -196,6 +195,41 @@ function groupByDir(files) {
     }
 
     return { directFiles, subtrees };
+}
+
+function joinDirs(node, isNotRoot = false) {
+    // join the dir with subdir if it's the only child
+    if ((node.children && node.children.length === 1) && (!node.files || node.files.length === 0)) {
+        // but don't do this to the root node!
+        if (isNotRoot) {
+            const thisName = node.name;
+
+            process.stdout.write('\nJoin dir: ' + node.name + '/' + node.children[0].name);
+
+            Object.assign(node, node.children[0]);
+
+            node.name = pathModule.join(thisName, node.name);
+
+            // do it again since this node has been overwritten
+            joinDirs(node, true);
+        }
+    } else {
+        if (node.children) {
+            for (const child of node.children) {
+                joinDirs(child, true);
+            }
+        }
+    }
+}
+
+function traverse(node, fn) {
+    fn(node);
+
+    if (node.children) {
+        for (const child of node.children) {
+            traverse(child, fn);
+        }
+    }
 }
 
 main();
