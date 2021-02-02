@@ -42,9 +42,10 @@ export default Vue.extend({
     watch: {
         value(value: boolean) {
             if (value) {
-                const settings = App.getModel(this.id)?.pixiModel?.internalModel.settings;
+                const model = App.getModel(this.id);
+                const settings = model?.pixiModel?.internalModel.settings;
 
-                this.url = settings?.url || '';
+                this.url = model?.url || '';
                 this.settingsJSON = JSON.stringify(settings?.json || {}, null, 2);
             }
         },
