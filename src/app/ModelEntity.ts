@@ -58,14 +58,14 @@ export class ModelEntity extends EventEmitter {
 
         try {
             await Live2DFactory.setupLive2DModel(pixiModel, source);
+
+            this.modelLoaded(pixiModel);
+            this.emit('modelLoaded', pixiModel);
         } catch (e) {
             console.warn(e);
 
             this.error = e instanceof Error ? e.message : e + '';
         }
-
-        this.modelLoaded(pixiModel);
-        this.emit('modelLoaded', pixiModel);
     }
 
     modelLoaded(pixiModel: Live2DModel) {
