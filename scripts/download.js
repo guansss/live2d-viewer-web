@@ -1,10 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
+const HttpsProxyAgent = require('https-proxy-agent');
 const { repos } = require('./const');
 
-const cacheFolder = path.resolve(__dirname, 'cache')
-const outputFolder = path.resolve(__dirname, './')
+const cacheFolder = path.resolve(__dirname, 'cache');
+const outputFolder = path.resolve(__dirname, './');
+
+let agent;
+
+if (process.env.http_proxy) {
+    console.log('Using proxy:', process.env.http_proxy);
+    agent = new HttpsProxyAgent(process.env.http_proxy);
+}
 
 function normalize(repo) {
     return repo.toLowerCase().replace(/\//g, '');
@@ -15,7 +23,7 @@ const tasks = repos.map(async repo => {
         url: `https://api.github.com/repos/${repo}/git/trees/master`,
     }, true);
 
-    const outputFile = path.resolve(outputFolder, normalize(repo) + '-tree.json')
+    const outputFile = path.resolve(outputFolder, normalize(repo) + '-tree.json');
 
     fs.writeFileSync(outputFile, JSON.stringify(tree), 'utf8');
 });
@@ -75,7 +83,7 @@ async function fetchJSON(url) {
         return JSON.parse(data);
     }
 
-    const data = await fetch(url).then(res => res.json());
+    const data = await fetch(url, { agent }).then(res => res.json());
 
     if (data.message) {
         throw new Error(data.message);
