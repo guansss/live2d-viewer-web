@@ -21,7 +21,11 @@ const folderBlacklist = [
 
 const fileBlacklist = [
     // broken file
-    "Sacred Sword princesses/model.json",
+    'Sacred Sword princesses/model.json',
+
+    // mature model
+    'Sacred Sword princesses/boss_cg_live2d_h004/.model.json',
+    'Sacred Sword princesses/char_cg_live2d_h048/.model.json',
 
     // non-model zip
     '少女咖啡枪 girls cafe gun/UnityLive2DExtractor+for+ガール・カフェ・ガン.zip',
