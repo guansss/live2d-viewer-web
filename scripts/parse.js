@@ -65,25 +65,26 @@ function processTree(tree, fullPath) {
     const children = [];
     const files = [];
 
-    if (folderBlacklist.includes(tree.path)) {
+    fullPath = pathModulePosix.join(fullPath, tree.path);
+
+    if (folderBlacklist.includes(fullPath)) {
         return false;
     }
-
-    fullPath = pathModulePosix.join(fullPath, tree.path);
 
     for (const node of tree.tree) {
         processed++;
 
-        if (typeof node === 'string') { // the node is a file (leaf)
-            const isBlacklisted = folderBlacklist.some(folder => node.includes(folder));
-
-            if (!isBlacklisted && processFile(node, tree.tree, fullPath)) {
+        // when the node is a leaf (file)
+        if (typeof node === 'string') {
+            if (processFile(node, tree.tree, fullPath)) {
                 files.push(node);
 
                 added++;
                 process.stdout.write('\rProcessed: ' + processed + '  Added: ' + added + '  JSONs: ' + jsons);
             }
-        } else { // the node is a tree
+        }
+        // when the node is a tree
+        else {
             if (processTree(node, fullPath)) {
                 children.push(node);
             }
@@ -108,6 +109,12 @@ function processTree(tree, fullPath) {
 }
 
 function processFile(file, siblings, fullPath) {
+    const filePath = pathModulePosix.join(fullPath, file);
+
+    if (fileBlacklist.includes(filePath) || folderBlacklist.some(folder => filePath.startsWith(folder))) {
+        return false;
+    }
+
     if (file.endsWith('.moc') || file.endsWith('.moc3')) {
         if (mocWhitelist.includes(file)) {
             return false;
@@ -156,10 +163,6 @@ function processFile(file, siblings, fullPath) {
         return true;
     }
 
-    if (fileBlacklist.includes(fullPath + '/' + file)) {
-        return false;
-    }
-
     return file.endsWith('model.json') || file.endsWith('model3.json') || file.endsWith('.zip');
 }
 
@@ -206,8 +209,6 @@ function joinDirs(node, isNotRoot = false) {
         && (!node.files || node.files.length === 0)
     ) {
         const thisName = node.name;
-
-        process.stdout.write('\nJoin dir: ' + node.name + '/' + node.children[0].name);
 
         Object.assign(node, node.children[0]);
 

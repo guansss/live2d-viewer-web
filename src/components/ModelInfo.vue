@@ -9,7 +9,7 @@
           <template v-slot:activator="{ on, attrs }">
             <v-btn icon @click="log" v-bind="attrs" v-on="on"><v-icon>mdi-console</v-icon></v-btn>
           </template>
-          <span>Log to console</span>
+          <span>Print to console</span>
         </v-tooltip>
 
         <v-btn icon @click="$emit('input',false)">
@@ -26,8 +26,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
 import { App } from '@/app/App';
+import Vue from 'vue';
 
 export default Vue.extend({
     name: "ModelInfo",
