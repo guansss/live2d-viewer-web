@@ -1,5 +1,6 @@
 const fs = require('fs');
-const pathModule = require('path').posix;
+const pathModule = require('path');
+const pathModulePosix = pathModule.posix;
 const { repos, folderBlacklist, fileBlacklist, mocWhitelist } = require('./const');
 
 console.time();
@@ -68,7 +69,7 @@ function processTree(tree, fullPath) {
         return false;
     }
 
-    fullPath = pathModule.join(fullPath, tree.path);
+    fullPath = pathModulePosix.join(fullPath, tree.path);
 
     for (const node of tree.tree) {
         processed++;
@@ -113,7 +114,7 @@ function processFile(file, siblings, fullPath) {
         }
 
         // path including the last "/"
-        const dir = pathModule.dirname(file) + '/';
+        const dir = pathModulePosix.dirname(file) + '/';
 
         const exactSiblings = siblings.filter(f => f.startsWith(dir)).map(f => f.slice(dir.length));
 
@@ -134,7 +135,7 @@ function processFile(file, siblings, fullPath) {
         const physics = exactSiblings.find(f => f.includes('physics'));
         const pose = exactSiblings.find(f => f.includes('pose'));
 
-        const filePath = pathModule.join(fullPath, file);
+        const filePath = pathModulePosix.join(fullPath, file);
 
         settingsJSONs[filePath] = file.endsWith('.moc')
             ? {
@@ -210,7 +211,7 @@ function joinDirs(node, isNotRoot = false) {
 
         Object.assign(node, node.children[0]);
 
-        node.name = pathModule.join(thisName, node.name);
+        node.name = pathModulePosix.join(thisName, node.name);
 
         // do it again since this node has been overwritten
         joinDirs(node, true);
