@@ -11,7 +11,7 @@
 
       <v-card-text class="pa-8">
         <v-text-field single-line filled label="URL" v-model="url" :messages="urlMessages"
-                      :error="urlError"></v-text-field>
+                      :error="urlError" @keyup.enter="create"></v-text-field>
 
         <div class="d-flex align-center">
           <v-btn icon small color="grey" @click="dropHelpDialog=true"><v-icon size="20">mdi-help-circle</v-icon></v-btn>

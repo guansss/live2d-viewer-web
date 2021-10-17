@@ -81,6 +81,7 @@ export default Vue.extend({
 .model-list
   position relative
   background-color transparent !important
+  pointer-events auto
 
   &:before
     content ''

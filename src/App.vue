@@ -143,7 +143,7 @@ export default Vue.extend({
         this.creation.dialog = true;
 
         if (!Background.current) {
-            this.snack('Drag and drop an image to set the background!');
+            this.snack('Drag and drop a local image to set the background!');
         }
     },
 });
