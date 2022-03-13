@@ -89,7 +89,7 @@ export class ModelEntity extends EventEmitter {
         pixiModel.backgroundVisible = false;
 
         try {
-            const canvas = renderer.extract.canvas(pixiModel);
+            const canvas = renderer.plugins.extract.canvas(pixiModel);
 
             canvas.toBlob(blob => this.thumbnail = URL.createObjectURL(blob), 'image/webp', 0.01);
         } catch (e) {
