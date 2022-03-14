@@ -1,5 +1,5 @@
 import { Live2DFactoryContext, Live2DModel as BaseLive2DModel } from 'pixi-live2d-display';
-import { HitAreaFrames } from 'pixi-live2d-display/src/tools/HitAreaFrames';
+import { HitAreaFrames } from '@/tools/HitAreaFrames';
 import { Sprite } from '@pixi/sprite';
 import { Texture } from '@pixi/core';
 import { Ticker } from '@pixi/ticker';
