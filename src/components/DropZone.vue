@@ -60,7 +60,7 @@ export default Vue.extend({
 
                 this.$emit('create', id!);
             } catch (e) {
-                e.message = 'Failed to load model: ' + e.message;
+                (e as Error).message = 'Failed to load model: ' + (e as Error).message;
 
                 this.$emit('error', e);
             }

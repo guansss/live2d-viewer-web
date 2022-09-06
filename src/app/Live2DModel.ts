@@ -1,7 +1,7 @@
 import { Live2DFactoryContext, Live2DModel as BaseLive2DModel } from 'pixi-live2d-display';
-import { HitAreaFrames } from '@/tools/HitAreaFrames';
+import { HitAreaFrames } from 'pixi-live2d-display/extra';
 import { Sprite } from '@pixi/sprite';
-import { Texture } from '@pixi/core';
+import { Texture, Renderer } from '@pixi/core';
 import { Ticker } from '@pixi/ticker';
 import './patches';
 import './zip';
@@ -87,12 +87,7 @@ export class Live2DModel extends BaseLive2DModel {
         for (let area of hitAreaNames) {
             area = area.toLowerCase();
 
-            const possibleGroups = [
-                area,
-                'tap' + area,
-                'tap_' + area,
-                'tap',
-            ];
+            const possibleGroups = [area, 'tap' + area, 'tap_' + area, 'tap'];
 
             for (const possibleGroup of possibleGroups) {
                 for (let group of Object.keys(this.internalModel.motionManager.definitions)) {
@@ -114,7 +109,7 @@ export class Live2DModel extends BaseLive2DModel {
         }
     }
 
-    protected _render(renderer: PIXI.Renderer) {
+    override _render(renderer: Renderer) {
         // render background before the model
         if (this.backgroundVisible) {
             this.background.visible = true;
@@ -127,7 +122,7 @@ export class Live2DModel extends BaseLive2DModel {
         super._render(renderer);
     }
 
-    destroy(options?: { children?: boolean; texture?: boolean; baseTexture?: boolean; }) {
+    destroy(options?: { children?: boolean; texture?: boolean; baseTexture?: boolean }) {
         super.destroy(options);
 
         Filter.release(this);

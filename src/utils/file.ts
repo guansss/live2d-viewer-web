@@ -1,26 +1,4 @@
-declare global {
-    interface DataTransferItem {
-        webkitGetAsEntry(): FileSystemEntry;
-    }
-
-    interface FileSystemEntry {
-        isFile: boolean;
-        isDirectory: boolean;
-        fullPath: string;
-    }
-
-    interface FileSystemDirectoryEntry extends FileSystemEntry {
-        createReader(): FileSystemDirectoryReader;
-    }
-
-    interface FileSystemFileEntry extends FileSystemEntry {
-        file(succeed: (file: File) => void, fail: (e: Error) => void): void;
-    }
-
-    interface FileSystemDirectoryReader {
-        readEntries(succeed: (entries: FileSystemEntry[]) => void, fail: (e: Error) => void): void;
-    }
-}
+import { nonNullableFilter } from './arr';
 
 export function basename(path: string): string {
     // https://stackoverflow.com/a/15270931
@@ -33,15 +11,11 @@ export function basename(path: string): string {
  * @see https://stackoverflow.com/q/5323668/13237325
  */
 export function isDraggingFile(event: DragEvent): boolean {
-    return !!event.dataTransfer?.types.some(type => type === 'Files');
+    return !!event.dataTransfer?.types.some((type) => type === 'Files');
 }
 
 export async function readFiles(dataTransferItemList: DataTransferItemList): Promise<File[]> {
-    const entries: FileSystemEntry[] = [];
-
-    for (let i = 0; i < dataTransferItemList.length; i++) {
-        entries.push(dataTransferItemList[i].webkitGetAsEntry());
-    }
+    const entries = [...dataTransferItemList].map((item) => item.webkitGetAsEntry()).filter(nonNullableFilter);
 
     return readEntries(entries);
 }
@@ -49,15 +23,17 @@ export async function readFiles(dataTransferItemList: DataTransferItemList): Pro
 async function readEntries(entries: FileSystemEntry[]): Promise<File[]> {
     const files: File[] = [];
 
-    await Promise.all(entries.map(async entry => {
-        if (entry.isFile) {
-            files.push(await readFileEntry(entry as FileSystemFileEntry));
-        } else if (entry.isDirectory) {
-            const subEntries = await readDirEntry(entry as FileSystemDirectoryEntry);
+    await Promise.all(
+        entries.map(async (entry) => {
+            if (entry.isFile) {
+                files.push(await readFileEntry(entry as FileSystemFileEntry));
+            } else if (entry.isDirectory) {
+                const subEntries = await readDirEntry(entry as FileSystemDirectoryEntry);
 
-            files.push(...await readEntries(subEntries));
-        }
-    }));
+                files.push(...(await readEntries(subEntries)));
+            }
+        })
+    );
 
     return files;
 }

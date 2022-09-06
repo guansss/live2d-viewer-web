@@ -3,6 +3,7 @@ import { EventEmitter } from '@pixi/utils';
 import { draggable } from '@/tools/dragging';
 import { settings } from '@pixi/settings';
 import { Renderer } from '@pixi/core';
+import { Extract } from '@pixi/extract';
 import { Filter } from '@/app/Filter';
 import { ModelLoadingState } from './ModelLoadingState';
 import { Live2DFactory } from 'pixi-live2d-display';
@@ -89,9 +90,9 @@ export class ModelEntity extends EventEmitter {
         pixiModel.backgroundVisible = false;
 
         try {
-            const canvas = renderer.plugins.extract.canvas(pixiModel);
+            const canvas = (renderer.plugins.extract as Extract).canvas(pixiModel);
 
-            canvas.toBlob(blob => this.thumbnail = URL.createObjectURL(blob), 'image/webp', 0.01);
+            canvas.toBlob(blob => this.thumbnail = URL.createObjectURL(blob!), 'image/webp', 0.01);
         } catch (e) {
             console.warn(e);
         }

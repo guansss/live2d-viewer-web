@@ -28,7 +28,7 @@ Live2DLoader.middlewares[Live2DLoader.middlewares.indexOf(XHRLoader.loader)] = a
         await XHRLoader.loader(context, next);
         return;
     } catch (e) {
-        if (!(e.status === 403 && url.includes('jsdelivr'))) {
+        if (!(e && (e as any).status === 403 && url.includes('jsdelivr'))) {
             throw e;
         }
 

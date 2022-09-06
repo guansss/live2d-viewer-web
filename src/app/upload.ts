@@ -47,7 +47,7 @@ export async function createSettings(files: File[]): Promise<ModelSettings[]> {
         settingsFiles.length = MAX_SETTINGS_FILES;
     }
 
-    let error: Error | undefined;
+    let error: unknown;
 
     const settingsArray: ModelSettings[] = [];
 

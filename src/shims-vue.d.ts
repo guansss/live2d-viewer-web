@@ -1,5 +1,3 @@
-import { Live2DApp } from '@/app/Live2DApp';
-
 declare module '*.vue' {
     import Vue from 'vue';
     export default Vue;
@@ -7,6 +5,6 @@ declare module '*.vue' {
 
 declare module 'vue/types/vue' {
     export interface Vue {
-        $live2dApp: Live2DApp;
+        $live2dApp: import('@/app/Live2DApp').Live2DApp;
     }
 }
