@@ -1,16 +1,12 @@
+import { Filter } from '@/app/Filter';
 import { Application } from '@pixi/app';
-import { TickerPlugin } from '@pixi/ticker';
-import { AbstractRenderer, BatchRenderer, Renderer } from '@pixi/core';
+import { BatchRenderer, Renderer, extensions } from '@pixi/core';
 import { Extract } from '@pixi/extract';
 import { InteractionManager } from '@pixi/interaction';
+import { TickerPlugin } from '@pixi/ticker';
 import Stats from 'stats.js';
-import { Filter } from '@/app/Filter';
 
-// Application.registerPlugin(TickerPlugin as any);
-
-// Renderer.registerPlugin('extract', Extract as any);
-// Renderer.registerPlugin('batch', BatchRenderer);
-// Renderer.registerPlugin('interaction', InteractionManager);
+extensions.add(TickerPlugin, Extract, BatchRenderer, InteractionManager);
 
 export class PixiApp extends Application {
     declare renderer: Renderer;
@@ -20,7 +16,7 @@ export class PixiApp extends Application {
             view: document.getElementById('canvas') as HTMLCanvasElement,
             resizeTo: window,
             antialias: true,
-            transparent: true,
+            backgroundAlpha: 0,
         });
 
         this.ticker.remove(this.render, this);

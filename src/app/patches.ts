@@ -13,8 +13,7 @@ import {
 } from 'pixi-live2d-display';
 import JSON5 from 'json5';
 import { ping } from '@/utils';
-import unionBy from 'lodash/unionBy';
-import snakeCase from 'lodash/snakeCase';
+import { snakeCase, unionBy } from 'lodash-es';
 import { url as urlUtils } from '@pixi/utils';
 import { getAlternativeURL, getSettingsJSON } from './data';
 import { CommonModelJSON } from '@/global';

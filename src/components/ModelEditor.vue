@@ -105,7 +105,7 @@ import { App } from '@/app/App';
 import { Filter } from '@/app/Filter';
 import { Live2DModel } from '@/app/Live2DModel';
 import { ModelEntity } from '@/app/ModelEntity';
-import clamp from 'lodash/clamp';
+import { clamp } from 'lodash-es';
 import { MotionPriority, MotionState } from 'pixi-live2d-display';
 import Vue from 'vue';
 

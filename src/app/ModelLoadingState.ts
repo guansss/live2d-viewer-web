@@ -1,6 +1,6 @@
-import { Live2DFactoryContext, Live2DFactory, ModelSettings } from "pixi-live2d-display";
+import { lowerCase } from 'lodash-es';
+import { Live2DFactory } from "pixi-live2d-display";
 import { Live2DModel } from './Live2DModel';
-import { lowerCase } from 'lodash';
 
 const enum StageState {
     NOT_AVAILABLE, PENDING, COMPLETED, FAILED

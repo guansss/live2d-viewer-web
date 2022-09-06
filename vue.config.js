@@ -1,8 +1,6 @@
 module.exports = {
     publicPath: '',
-    transpileDependencies: [
-        "vuetify",
-    ],
+    transpileDependencies: ['vuetify'],
 
     configureWebpack: {
         devServer: {
@@ -18,21 +16,19 @@ module.exports = {
             config.plugins.delete('fork-ts-checker');
         }
 
-        config
-            .plugin('define')
-            .tap(args => {
-                args[0].__SOURCE_REPOSITORIES__ = JSON.stringify(require('./scripts/const').repos);
-                args[0].__BUILD_TIME__ = Date.now();
+        config.plugin('define').tap((args) => {
+            args[0].__SOURCE_REPOSITORIES__ = JSON.stringify(require('./scripts/const').repos);
+            args[0].__BUILD_TIME__ = Date.now();
 
-                return args;
-            });
+            return args;
+        });
 
-        config
-            .plugin('html')
-            .tap(args => {
-                args[0].title = 'Live2D Viewer Online';
+        config.plugin('html').tap((args) => {
+            args[0].title = 'Live2D Viewer Online';
 
-                return args;
-            });
+            return args;
+        });
+
+        config.resolve.set('fallback', { stream: false });
     },
 };

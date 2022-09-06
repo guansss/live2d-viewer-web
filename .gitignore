@@ -4,6 +4,7 @@ scripts/**/*.json
 public/*.json
 
 .idea
+.vscode
 
 # Logs
 logs

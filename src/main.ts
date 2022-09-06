@@ -10,9 +10,9 @@ Vue.directive('visible', function(el, binding) {
     el.style.visibility = !!binding.value ? 'visible' : 'hidden';
 });
 
-(window as any).vueApp = new Vue({
+(window as any).vueApp = new (Vue as any)({
     vuetify,
-    render: h => h(VueApp),
+    render: (h: any) => h(VueApp),
 }).$mount('#app');
 
 (window as any).App = App;
