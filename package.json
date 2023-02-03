@@ -13,6 +13,7 @@
     "@pixi/filter-crt": "^4.2.0",
     "@pixi/filter-outline": "^4.2.0",
     "@pixi/filter-pixelate": "^4.2.0",
+    "@tauri-apps/api": "^1.2.0",
     "@types/lodash-es": "^4.17.6",
     "@vue/cli": "^5.0.8",
     "gh-pages": "^3.1.0",
@@ -28,6 +29,7 @@
     "vuetify": "^2.2.11"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^1.2.3",
     "@vue/cli-plugin-typescript": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
     "sass": "^1.19.0",
